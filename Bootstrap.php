@@ -19,7 +19,7 @@ class Bootstrap implements BootstrapInterface
         // Add module URL rules
         $app->getUrlManager()->addRules(
             [
-                $prefix . '<module:comments>/' => '<module>/default/index',
+                $prefix . '<module:comments>/' => '<module>/comments/index',
                 $prefix . '<module:comments>/<controller>/' => '<module>/<controller>',
                 $prefix . '<module:comments>/<controller>/<action>' => '<module>/<controller>/<action>',
                 $prefix . '<module:comments>/<controller>/<action>' => '<module>/<controller>/<action>',
