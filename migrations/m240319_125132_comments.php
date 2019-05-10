@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Class m240319_125132_comments
+ * Class m190324_125132_comments
  */
-class m240319_125132_comments extends Migration
+class m190324_125132_comments extends Migration
 {
     /**
      * {@inheritdoc}
