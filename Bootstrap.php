@@ -20,15 +20,32 @@ class Bootstrap implements BootstrapInterface
         $module = Yii::$app->getModule('comments');
 
         // Get URL path prefix if exist
-        $prefix = (isset($module->routePrefix) ? $module->routePrefix . '/' : '');
+        if (isset($module->routePrefix)) {
+            $app->getUrlManager()->enableStrictParsing = true;
+            $prefix = $module->routePrefix . '/';
+        } else {
+            $prefix = '';
+        }
 
         // Add module URL rules
         $app->getUrlManager()->addRules(
             [
                 $prefix . '<module:comments>/' => '<module>/comments/index',
-                $prefix . '<module:comments>/<controller>/' => '<module>/<controller>',
-                $prefix . '<module:comments>/<controller>/<action>' => '<module>/<controller>/<action>',
-                $prefix . '<module:comments>/<controller>/<action>' => '<module>/<controller>/<action>',
+                $prefix . '<module:comments>/<controller:\w+>/' => '<module>/<controller>',
+                $prefix . '<module:comments>/<controller:\w+>/<action:\w+>' => '<module>/<controller>/<action>',
+                [
+                    'pattern' => $prefix . '<module:comments>/',
+                    'route' => '<module>/comments/index',
+                    'suffix' => '',
+                ], [
+                'pattern' => $prefix . '<module:comments>/<controller:\w+>/',
+                'route' => '<module>/<controller>',
+                'suffix' => '',
+            ], [
+                'pattern' => $prefix . '<module:comments>/<controller:\w+>/<action:\w+>',
+                'route' => '<module>/<controller>/<action>',
+                'suffix' => '',
+            ],
             ],
             true
         );

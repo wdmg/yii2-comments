@@ -1,7 +1,8 @@
 <?php
 
 return [
-    'Comments' => "Комментарии"
+    'Comments' => "Комментарии",
+    'Tree comments system' => "Древовидная система комментариев",
 ];
 
 ?>
