@@ -126,8 +126,8 @@ class Module extends \yii\base\Module
         ];
 
         // Name and description translation of module
-        $this->name = Yii::t('app/modules/bookmarks', $this->name);
-        $this->description = Yii::t('app/modules/bookmarks', $this->description);
+        $this->name = Yii::t('app/modules/comments', $this->name);
+        $this->description = Yii::t('app/modules/comments', $this->description);
     }
 
     public static function t($category, $message, $params = [], $language = null)
