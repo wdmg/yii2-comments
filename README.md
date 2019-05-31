@@ -9,7 +9,7 @@ Tree comments system for Yii2
 
 # Requirements 
 * PHP 5.6 or higher
-* Yii2 v.2.0.13 and newest
+* Yii2 v.2.0.19 and newest
 * [Yii2 Users](https://github.com/wdmg/yii2-users) module (optionaly)
 
 # Installation
@@ -63,6 +63,5 @@ Use the `Module::dashboardNavItems()` method of the module to generate a navigat
     ?>
 
 # Status and version [in progress development]
+* v.0.0.4 - Update Yii2 version
 * v.0.0.3 - Added module name and description, translations. Routing fix.
-* v.0.0.2 - Added base model, CRUD
-* v.0.0.1 - Added base migrations
