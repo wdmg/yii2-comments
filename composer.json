@@ -4,7 +4,7 @@
   "keywords": ["yii2", "yii2-comments", "comments system", "wdmg"],
   "type": "yii2-extension",
   "license": "MIT",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "https://github.com/wdmg/yii2-comments",
   "support": {
     "source": "https://github.com/wdmg/yii2-comments",
@@ -21,15 +21,12 @@
     }
   ],
   "require": {
-    "yiisoft/yii2": "^2.0.19"
+    "yiisoft/yii2": "^2.0.20"
   },
   "minimum-stability": "dev",
   "autoload": {
     "psr-4": {
       "wdmg\\comments\\": ""
     }
-  },
-  "extra": {
-    "bootstrap": "wdmg\\comments\\Bootstrap"
   }
 }
