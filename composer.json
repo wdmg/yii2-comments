@@ -1,10 +1,10 @@
 {
   "name": "wdmg/yii2-comments",
-  "description": "Tree comments system for Yii2",
+  "description": "Tree comments system",
   "keywords": ["yii2", "yii2-comments", "comments system", "wdmg"],
   "type": "yii2-extension",
   "license": "MIT",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "homepage": "https://github.com/wdmg/yii2-comments",
   "support": {
     "source": "https://github.com/wdmg/yii2-comments",
