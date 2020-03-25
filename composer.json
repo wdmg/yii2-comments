@@ -4,7 +4,7 @@
   "keywords": ["yii2", "yii2-comments", "comments system", "wdmg"],
   "type": "yii2-extension",
   "license": "MIT",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "homepage": "https://github.com/wdmg/yii2-comments",
   "support": {
     "source": "https://github.com/wdmg/yii2-comments",

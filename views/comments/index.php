@@ -17,7 +17,7 @@ $this->params['breadcrumbs'][] = $this->title;
         <?= Html::encode($this->title) ?> <small class="text-muted pull-right">[v.<?= $this->context->module->version ?>]</small>
     </h1>
 </div>
-<div class="options-index">
+<div class="comments-index">
     <?php Pjax::begin(); ?>
     <?= GridView::widget([
         'dataProvider' => $dataProvider,
@@ -39,6 +39,21 @@ $this->params['breadcrumbs'][] = $this->title;
             //'session',
             //'is_published',
             ['class' => 'yii\grid\ActionColumn'],
+        ],
+        'pager' => [
+            'options' => [
+                'class' => 'pagination',
+            ],
+            'maxButtonCount' => 5,
+            'activePageCssClass' => 'active',
+            'prevPageCssClass' => '',
+            'nextPageCssClass' => '',
+            'firstPageCssClass' => 'previous',
+            'lastPageCssClass' => 'next',
+            'firstPageLabel' => Yii::t('app/modules/comments', 'First page'),
+            'lastPageLabel'  => Yii::t('app/modules/comments', 'Last page'),
+            'prevPageLabel'  => Yii::t('app/modules/comments', '&larr; Prev page'),
+            'nextPageLabel'  => Yii::t('app/modules/comments', 'Next page &rarr;')
         ],
     ]); ?>
     <hr/>
