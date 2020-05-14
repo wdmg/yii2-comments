@@ -3,9 +3,9 @@
 use yii\db\Migration;
 
 /**
- * Class m190324_125132_comments
+ * Class m200514_145910_comments
  */
-class m190324_125132_comments extends Migration
+class m200514_145910_comments extends Migration
 {
     /**
      * {@inheritdoc}
@@ -19,35 +19,42 @@ class m190324_125132_comments extends Migration
         }
 
         $this->createTable('{{%comments}}', [
-            'id' => $this->primaryKey(),
-            'parent_id' => $this->integer()->null(),
-            'user_id' => $this->integer()->null(),
-
+            'id' => $this->bigPrimaryKey(),
+            'parent_id' => $this->bigInteger()->null(),
+            'context' => $this->string(32)->notNull(),
+            'target' => $this->string(128)->notNull(),
             'name' => $this->string(32)->notNull(),
             'email' => $this->string(32)->notNull(),
-            'phone' => $this->string(32)->null(),
-            'photo' => $this->string(64)->null(),
-
-            'condition' => $this->string(64)->notNull(),
             'comment' => $this->text(),
+            'user_id' => $this->integer()->null(),
+            'status' => $this->tinyInteger(1)->null()->defaultValue(0),
+            'session' => $this->string(32)->notNull(),
             'created_at' => $this->dateTime()->defaultExpression('CURRENT_TIMESTAMP'),
             'updated_at' => $this->datetime()->defaultExpression('CURRENT_TIMESTAMP'),
-            'session' => $this->string(32)->notNull(),
-            'is_published' => $this->boolean(),
+
         ], $tableOptions);
 
         $this->createIndex('idx_comments_parent','{{%comments}}', ['parent_id'],false);
-        $this->createIndex('idx_comments_user','{{%comments}}', ['user_id'],false);
-        
+        $this->createIndex('idx_comments_condition','{{%comments}}', ['context', 'target'],false);
         $this->createIndex('idx_comments_name','{{%comments}}', ['name'],false);
         $this->createIndex('idx_comments_email','{{%comments}}', ['email'],false);
-        
-        $this->createIndex('idx_comments_condition','{{%comments}}', ['condition'],false);
         $this->createIndex('idx_comments_session','{{%comments}}', ['session'],false);
-        $this->createIndex('idx_comments_published','{{%comments}}', ['is_published'],false);
+        $this->createIndex('idx_comments_user','{{%comments}}', ['user_id'],false);
+        $this->createIndex('idx_comments_status','{{%comments}}', ['status'],false);
+
+        // Setup foreign key parent_id to id
+        $this->addForeignKey(
+            'fk_comments_to_parent',
+            '{{%comments}}',
+            'parent_id',
+            '{{%comments}}',
+            'id',
+            'NO ACTION',
+            'CASCADE'
+        );
 
         // If exist module `Users` set foreign key `user_id` to `users.id`
-        if(class_exists('\wdmg\users\models\Users') && isset(Yii::$app->modules['users'])) {
+        if (class_exists('\wdmg\users\models\Users')) {
             $userTable = \wdmg\users\models\Users::tableName();
             $this->addForeignKey(
                 'fk_comments_to_users',
@@ -68,16 +75,19 @@ class m190324_125132_comments extends Migration
     public function safeDown()
     {
         $this->dropIndex('idx_comments_parent', '{{%comments}}');
-        $this->dropIndex('idx_comments_user', '{{%comments}}');
-
+        $this->dropIndex('idx_comments_condition', '{{%comments}}');
         $this->dropIndex('idx_comments_name', '{{%comments}}');
         $this->dropIndex('idx_comments_email', '{{%comments}}');
-        
-        $this->dropIndex('idx_comments_condition', '{{%comments}}');
         $this->dropIndex('idx_comments_session', '{{%comments}}');
-        $this->dropIndex('idx_comments_published', '{{%comments}}');
+        $this->dropIndex('idx_comments_user', '{{%comments}}');
+        $this->dropIndex('idx_comments_status', '{{%comments}}');
 
-        if(class_exists('\wdmg\users\models\Users') && isset(Yii::$app->modules['users'])) {
+        $this->dropForeignKey(
+            'fk_comments_to_parent',
+            '{{%comments}}'
+        );
+
+        if (class_exists('\wdmg\users\models\Users')) {
             $userTable = \wdmg\users\models\Users::tableName();
             if (!(Yii::$app->db->getTableSchema($userTable, true) === null)) {
                 $this->dropForeignKey(

@@ -87,5 +87,12 @@ class Module extends BaseModule
     public function bootstrap($app)
     {
         parent::bootstrap($app);
+
+        // Configure comments component
+        $app->setComponents([
+            'comments' => [
+                'class' => \wdmg\comments\components\Comments::class
+            ]
+        ]);
     }
 }

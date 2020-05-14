@@ -1,6 +1,9 @@
 Changelog
 =========
 
+## 1.*
+ * Migrations rebase, refactoring model
+ 
 ## 0.0.11 (2020-03-25)
  * Added pagination
  * Up to date dependencies

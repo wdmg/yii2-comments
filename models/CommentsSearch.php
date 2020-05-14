@@ -17,8 +17,9 @@ class CommentsSearch extends Comments
     public function rules()
     {
         return [
-            [['id', 'parent_id', 'user_id', 'is_published'], 'integer'],
-            [['name', 'email', 'phone', 'photo', 'condition', 'comment', 'created_at', 'updated_at', 'session'], 'safe'],
+            [['id', 'parent_id', 'user_id', 'status'], 'integer'],
+            [['context', 'target', 'name', 'email', 'comment'], 'string'],
+            [['created_at', 'updated_at', 'session'], 'safe'],
         ];
     }
 
@@ -46,6 +47,11 @@ class CommentsSearch extends Comments
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
+            'sort'=> [
+                'defaultOrder' => [
+                    'id' => SORT_DESC
+                ]
+            ]
         ]);
 
         $this->load($params);
@@ -54,25 +60,31 @@ class CommentsSearch extends Comments
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
-        }
+        }/* else {
+            // query all without languages version
+            $query->where([
+                'parent_id' => null,
+            ]);
+        }*/
 
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'parent_id' => $this->parent_id,
+            'context' => $this->context,
+            'target' => $this->target,
             'user_id' => $this->user_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'is_published' => $this->is_published,
+            'session' => $this->session,
         ]);
+
+        if ($this->status !== "*")
+            $query->andFilterWhere(['like', 'status', $this->status]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'email', $this->email])
-            ->andFilterWhere(['like', 'phone', $this->phone])
-            ->andFilterWhere(['like', 'photo', $this->photo])
-            ->andFilterWhere(['like', 'condition', $this->condition])
-            ->andFilterWhere(['like', 'comment', $this->comment])
-            ->andFilterWhere(['like', 'session', $this->session]);
+            ->andFilterWhere(['like', 'comment', $this->comment]);
 
         return $dataProvider;
     }

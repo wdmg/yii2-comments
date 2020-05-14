@@ -9,22 +9,26 @@ use Yii;
  *
  * @property int $id
  * @property int $parent_id
- * @property int $user_id
+ * @property string $context
+ * @property string $target
  * @property string $name
  * @property string $email
- * @property string $phone
- * @property string $photo
- * @property string $condition
  * @property string $comment
+ * @property int $user_id
+ * @property int $status
+ * @property string $session
  * @property string $created_at
  * @property string $updated_at
- * @property string $session
- * @property int $is_published
  *
  * @property Users $user
  */
+
 class Comments extends \yii\db\ActiveRecord
 {
+    const COMMENT_STATUS_REJECTED = -1; // Comment has been rejected
+    const COMMENT_STATUS_AWAITING = 0; // Comment has awaiting moderation
+    const COMMENT_STATUS_PUBLISHED = 1; // Comment has been published
+
     /**
      * {@inheritdoc}
      */
@@ -39,15 +43,17 @@ class Comments extends \yii\db\ActiveRecord
     public function rules()
     {
         $rules = [
-            [['parent_id', 'user_id', 'is_published'], 'integer'],
-            [['name', 'email', 'condition', 'session'], 'required'],
-            [['comment'], 'string'],
+            [['parent_id', 'user_id', 'status'], 'integer'],
+            [['context', 'target', 'name', 'email', 'comment', 'session'], 'required'],
+            [['context', 'name'], 'string', 'min' => 3, 'max' => 32],
+            ['email', 'email'],
+            ['comment', 'string'],
+            ['target', 'string', 'max' => 128],
+            ['status', 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['name', 'email', 'phone', 'session'], 'string', 'max' => 32],
-            [['photo', 'condition'], 'string', 'max' => 64],
         ];
 
-        if(class_exists('\wdmg\users\models\Users') && isset(Yii::$app->modules['users']))
+        if (class_exists('\wdmg\users\models\Users') && isset(Yii::$app->modules['users']))
             $rules[] = [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \wdmg\users\models\Users::class, 'targetAttribute' => ['user_id' => 'id']];
             
         return $rules;
@@ -61,17 +67,16 @@ class Comments extends \yii\db\ActiveRecord
         return [
             'id' => Yii::t('app/modules/comments', 'ID'),
             'parent_id' => Yii::t('app/modules/comments', 'Parent ID'),
-            'user_id' => Yii::t('app/modules/comments', 'User ID'),
+            'context' => Yii::t('app/modules/comments', 'Context'),
+            'target' => Yii::t('app/modules/comments', 'Target'),
             'name' => Yii::t('app/modules/comments', 'Name'),
-            'email' => Yii::t('app/modules/comments', 'Email'),
-            'phone' => Yii::t('app/modules/comments', 'Phone'),
-            'photo' => Yii::t('app/modules/comments', 'Photo'),
-            'condition' => Yii::t('app/modules/comments', 'Condition'),
+            'email' => Yii::t('app/modules/comments', 'E-mail'),
             'comment' => Yii::t('app/modules/comments', 'Comment'),
-            'created_at' => Yii::t('app/modules/comments', 'Created At'),
-            'updated_at' => Yii::t('app/modules/comments', 'Updated At'),
+            'user_id' => Yii::t('app/modules/comments', 'User ID'),
+            'status' => Yii::t('app/modules/comments', 'Status'),
             'session' => Yii::t('app/modules/comments', 'Session'),
-            'is_published' => Yii::t('app/modules/comments', 'Is Published'),
+            'created_at' => Yii::t('app/modules/comments', 'Created'),
+            'updated_at' => Yii::t('app/modules/comments', 'Updated'),
         ];
     }
 
