@@ -2,6 +2,7 @@ Changelog
 =========
 
 ## 1.*
+ * Added assets and CommentsWidget
  * Migrations rebase, refactoring model
  
 ## 0.0.11 (2020-03-25)

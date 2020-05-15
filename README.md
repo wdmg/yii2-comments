@@ -1,4 +1,4 @@
-[![Yii2](https://img.shields.io/badge/required-Yii2_v2.0.33-blue.svg)](https://packagist.org/packages/yiisoft/yii2)
+[![Yii2](https://img.shields.io/badge/required-Yii2_v2.0.35-blue.svg)](https://packagist.org/packages/yiisoft/yii2)
 [![Downloads](https://img.shields.io/packagist/dt/wdmg/yii2-comments.svg)](https://packagist.org/packages/wdmg/yii2-comments)
 [![Packagist Version](https://img.shields.io/packagist/v/wdmg/yii2-comments.svg)](https://packagist.org/packages/wdmg/yii2-comments)
 ![Progress](https://img.shields.io/badge/progress-in_development-red.svg)
@@ -9,7 +9,7 @@ Tree comments system for Yii2
 
 # Requirements 
 * PHP 5.6 or higher
-* Yii2 v.2.0.33 and newest
+* Yii2 v.2.0.35 and newest
 * [Yii2 Base](https://github.com/wdmg/yii2-base) module (required)
 * [Yii2 Users](https://github.com/wdmg/yii2-users) module (optionaly)
 
