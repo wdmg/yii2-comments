@@ -42,6 +42,12 @@ class Module extends BaseModule
      */
     public $description = "Tree comments system";
 
+
+
+    public $editCommentTimeout = 300; // (5 min.)
+
+    public $deleteCommentTimeout = 3600; // (1 hour)
+
     /**
      * @var string the module version
      */

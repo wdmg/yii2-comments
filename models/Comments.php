@@ -25,7 +25,8 @@ use Yii;
 
 class Comments extends \yii\db\ActiveRecord
 {
-    const COMMENT_STATUS_REJECTED = -1; // Comment has been rejected
+    const COMMENT_STATUS_REJECTED = -2; // Comment has been rejected
+    const COMMENT_STATUS_DELETED = -1; // Comment has been deleted
     const COMMENT_STATUS_AWAITING = 0; // Comment has awaiting moderation
     const COMMENT_STATUS_PUBLISHED = 1; // Comment has been published
 

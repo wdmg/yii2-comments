@@ -2,17 +2,19 @@
 
 namespace wdmg\comments\widgets;
 
-use wdmg\helpers\ArrayHelper;
 use Yii;
 use yii\base\Widget;
 use yii\helpers\Html;
-use wdmg\comments\CommentsAsset;
 use yii\i18n\Formatter;
+use \yii\helpers\Url;
+use wdmg\helpers\ArrayHelper;
+use wdmg\comments\CommentsAsset;
 
 class CommentsWidget  extends Widget
 {
     public $comments;
-    public $maxLevels;
+    public $editTimeout = 300;
+    public $useGravatar = false;
     public $options = [
         'listRootTag' => 'ul',
         'listRootOptions' => [
@@ -29,10 +31,11 @@ class CommentsWidget  extends Widget
             'class' => 'media comment-reply'
         ],
 
+        'userPhotoSize' => 64, // 32px
         'userPhotoAlign' => 'left', // left/right
 
         'userPhotoOptions' => [
-            'class' => 'media-object img-circle img-thumbnail size-64x64'
+            'class' => 'media-object img-circle img-thumbnail'
         ],
 
         'userLinkOptions' => ['class' => 'user-link'],
@@ -49,16 +52,14 @@ class CommentsWidget  extends Widget
 
     public function run()
     {
-        $output = $this->buildCommentsTree($this->comments, $this->maxLevels);
+        $output = $this->buildCommentsTree($this->comments);
         echo $output;
     }
 
-
-    private function buildCommentsTree($comments = [], $maxLevels = 2) {
+    private function buildCommentsTree($comments = []) {
 
         $output = '';
-        $isRootLevel = false;
-        $isMaxLevel = false;
+        $userId = Yii::$app->getUser()->getId();
 
         if (is_string($this->options['listRootTag']))
             $listRootTag = $this->options['listRootTag'];
@@ -87,11 +88,15 @@ class CommentsWidget  extends Widget
             $itemReplyOptions = $this->options['itemReplyOptions'];
 
 
+        if (is_numeric($this->options['userPhotoSize']))
+            $userPhotoSize = $this->options['userPhotoSize'];
+
         if (is_string($this->options['userPhotoAlign']))
             $userPhotoAlign = $this->options['userPhotoAlign'];
 
         if (is_array($this->options['userPhotoOptions']))
             $userPhotoOptions = $this->options['userPhotoOptions'];
+
 
         if (is_array($this->options['userLinkOptions']))
             $userLinkOptions = $this->options['userLinkOptions'];
@@ -99,27 +104,45 @@ class CommentsWidget  extends Widget
         foreach($comments as $comment) {
 
             $item = '';
+            $isRootLevel = false;
 
             if (isset($comment['_level'])) {
 
                 if (intval($comment['_level']) == 1)
                     $isRootLevel = true;
 
-                if (intval($comment['_level']) > intval($maxLevels))
-                    $isMaxLevel = true;
+            }
 
+            if ($userPhotoSize == 32) {
+                $userDefaultPhoto = $this->_bundle->baseUrl . "/images/user-default-32.png";
+                $userPhotoSizeClass = ["size-32x32"];
+            } else if ($userPhotoSize == 96) {
+                $userDefaultPhoto = $this->_bundle->baseUrl . "/images/user-default-96.png";
+                $userPhotoSizeClass = ["size-96x96"];
+            } else if ($userPhotoSize == 128) {
+                $userDefaultPhoto = $this->_bundle->baseUrl . "/images/user-default-128.png";
+                $userPhotoSizeClass = ["size-128x128"];
+            } else {
+                $userDefaultPhoto = $this->_bundle->baseUrl . "/images/user-default-64.png";
+                $userPhotoSizeClass = ["size-64x64"];
+            }
+
+            if ($this->useGravatar && isset($comment['email']) && !isset($comment['photo'])) {
+                $hash = md5(strtolower(trim($comment['email'])));
+                $defaultPhoto = urlencode(Url::to($userDefaultPhoto, true));
+                $comment['photo'] = "https://www.gravatar.com/avatar/" . $hash . "?s=" . $userPhotoSize. "&d=" . $defaultPhoto;
             }
 
             if (isset($comment['photo']))
                 $photo = Html::img(
                     $comment['photo'],
-                    ArrayHelper::merge($userPhotoOptions, [
+                    ArrayHelper::merge($userPhotoOptions, $userPhotoSizeClass, [
                         'alt' => $comment['name'],
                     ])
                 );
             else
-                $photo = Html::img("data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+PCEtLQpTb3VyY2UgVVJMOiBob2xkZXIuanMvNjR4NjQKQ3JlYXRlZCB3aXRoIEhvbGRlci5qcyAyLjYuMC4KTGVhcm4gbW9yZSBhdCBodHRwOi8vaG9sZGVyanMuY29tCihjKSAyMDEyLTIwMTUgSXZhbiBNYWxvcGluc2t5IC0gaHR0cDovL2ltc2t5LmNvCi0tPjxkZWZzPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+PCFbQ0RBVEFbI2hvbGRlcl8xNzIxODBlNjBlNSB0ZXh0IHsgZmlsbDojQUFBQUFBO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1mYW1pbHk6QXJpYWwsIEhlbHZldGljYSwgT3BlbiBTYW5zLCBzYW5zLXNlcmlmLCBtb25vc3BhY2U7Zm9udC1zaXplOjEwcHQgfSBdXT48L3N0eWxlPjwvZGVmcz48ZyBpZD0iaG9sZGVyXzE3MjE4MGU2MGU1Ij48cmVjdCB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIGZpbGw9IiNFRUVFRUUiLz48Zz48dGV4dCB4PSIxMy45MjE4NzUiIHk9IjM2LjM2NDA2MjUiPjY0eDY0PC90ZXh0PjwvZz48L2c+PC9zdmc+",
-                    ArrayHelper::merge($userPhotoOptions, [
+                $photo = Html::img($userDefaultPhoto,
+                    ArrayHelper::merge($userPhotoOptions, $userPhotoSizeClass, [
                         'alt' => $comment['name'],
                     ])
                 );
@@ -152,30 +175,56 @@ class CommentsWidget  extends Widget
 
             $item .= '</div>'; // .media-content
 
-
             $item .= '<div class="media-footer">';
-            if (intval($comment['user_id']) == Yii::$app->getUser()->getId()) {
-                $item .= '<a href="#" class="btn btn-sm btn-link pull-right">Edit</a>';
+            if ($this->editTimeout && !is_null($userId)) {
+                if (
+                    ((intval($comment['user_id']) == $userId) && !is_null($userId)) ||
+                    ($comment['user_id'] == \Yii::$app->session->getId())
+                ) {
+                    $item .= Html::a('Delete', '#delete', [
+                        'class' => 'btn btn-sm btn-link pull-right',
+                        'data' => [
+                            'key' => $comment['id']
+                        ]
+                    ]);
+
+                    if (intval($this->editTimeout) >= (time() - strtotime($comment['updated_at']))) {
+                        $item .= Html::a('Edit', '#edit', [
+                            'class' => 'btn btn-sm btn-link pull-right',
+                            'data' => [
+                                'key' => $comment['id']
+                            ]
+                        ]);
+                    }
+                }
             }
-            if (intval($comment['user_id']) !== Yii::$app->getUser()->getId()) {
-                $item .= '<a href="#" class="btn btn-sm btn-link pull-left">Abuse</a>';
+            if (intval($comment['user_id']) !== $userId) {
+                $item .= Html::a('Abuse', '#abuse', [
+                    'class' => 'btn btn-sm btn-link pull-left',
+                    'data' => [
+                        'key' => $comment['id']
+                    ]
+                ]);
 
-                $item .= '<a href="#" class="btn btn-sm btn-link pull-right">Reply</a>';
+                $item .= Html::a('Reply', '#reply', [
+                    'class' => 'btn btn-sm btn-link pull-right',
+                    'data' => [
+                        'key' => $comment['id']
+                    ]
+                ]);
 
-                /*
-                $output .= '<a href="#" class="btn btn-sm btn-link pull-right">Dislike</a>';
-                $output .= '<a href="#" class="btn btn-sm btn-link pull-right">Like</a>';
-                */
-
+            } else {
+                $item .= '&nbsp;';
             }
             $item .= '</div>'; // .media-footer
 
 
             if (isset($comment['items'])) {
                 if (is_array($comment['items'])) {
-                    $item .= $this->buildCommentsTree($comment['items'], $maxLevels);
+                    $item .= $this->buildCommentsTree($comment['items']);
                 }
             }
+
             $item .= '</div>'; // .media-body
 
             if ($userPhotoAlign == 'right') {
@@ -197,14 +246,10 @@ class CommentsWidget  extends Widget
             }
         }
 
-        if (!$isMaxLevel) {
-            if ($isRootLevel)
-                return Html::tag($listRootTag, $output, $listRootOptions);
-            else
-                return $output;
-        } else {
+        if ($isRootLevel)
+            return Html::tag($listRootTag, $output, $listRootOptions);
+        else
             return $output;
-        }
     }
 
 }
