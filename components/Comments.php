@@ -55,6 +55,9 @@ class Comments extends Component
 
         }
 
+        if (is_null($target))
+            return null;
+
         $query = $this->model::find()->where([
             'context' => $context,
             'target' => $target,
@@ -62,12 +65,47 @@ class Comments extends Component
         ]);
 
         if ($query->exists()) {
-            $list = $query->asArray()->all();
-            return ArrayHelper::buildTree($list);
-        } else {
-            return null;
+            if ($list = $query->asArray()->all()) {
+                return [
+                    'items' => ArrayHelper::buildTree($list),
+                    'count' => count($list)
+                ];
+            }
         }
+        return null;
     }
+
+    public function getModel($context = 'default', $target = null, $newInstance = false) {
+
+        if (is_null($context))
+            return null;
+
+        if (is_null($target) && ($request = Yii::$app->request->resolve())) {
+
+            // Request route
+            if (isset($request[0]))
+                $target = $request[0];
+
+        }
+
+        if (is_null($target))
+            return null;
+
+        if ($newInstance)
+            $model = new \wdmg\comments\models\Comments;
+        else
+            $model = $this->model;
+
+        $model->context = $context;
+        $model->target = $target;
+
+        return $model;
+    }
+
+    public function getModule() {
+        return $this->module;
+    }
+
 }
 
 ?>

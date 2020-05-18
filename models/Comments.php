@@ -54,7 +54,7 @@ class Comments extends \yii\db\ActiveRecord
             [['created_at', 'updated_at'], 'safe'],
         ];
 
-        if (class_exists('\wdmg\users\models\Users') && isset(Yii::$app->modules['users']))
+        if (class_exists('\wdmg\users\models\Users'))
             $rules[] = [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \wdmg\users\models\Users::class, 'targetAttribute' => ['user_id' => 'id']];
             
         return $rules;
@@ -81,11 +81,40 @@ class Comments extends \yii\db\ActiveRecord
         ];
     }
 
+    public function init()
+    {
+        parent::init();
+        $this->prepareAttributes();
+    }
+
+    public function beforeValidate()
+    {
+        $this->prepareAttributes();
+        $this->status = self::COMMENT_STATUS_PUBLISHED;
+        return parent::beforeValidate();
+    }
+
+    private function prepareAttributes() {
+        if ($user = Yii::$app->getUser()) {
+            if (!$user->isGuest && ($identity = $user->getIdentity())) {
+                $this->name = $identity->username;
+                $this->email = $identity->email;
+                $this->user_id = $identity->getId();
+            } else {
+                $this->user_id = null;
+            }
+        }
+
+        if ($session = Yii::$app->getSession())
+            $this->session = $session->getId();
+
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */
     public function getUser()
     {
-        return $this->hasOne(Users::class, ['id' => 'user_id']);
+        return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'user_id']);
     }
 }

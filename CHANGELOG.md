@@ -2,6 +2,7 @@ Changelog
 =========
 
 ## 1.*
+ * Added _form and _list views for widget
  * Added assets and CommentsWidget
  * Migrations rebase, refactoring model
  

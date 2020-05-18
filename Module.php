@@ -42,7 +42,11 @@ class Module extends BaseModule
      */
     public $description = "Tree comments system";
 
-
+    public $defaultController = "comments/default";
+    public $defaultListView = '@vendor/wdmg/yii2-comments/widgets/views/_list';
+    //public $defaultListView = '_list';
+    public $defaultFormView = '@vendor/wdmg/yii2-comments/widgets/views/_form';
+    //public $defaultFormView = '_form';
 
     public $editCommentTimeout = 300; // (5 min.)
 
