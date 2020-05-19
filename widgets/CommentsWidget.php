@@ -22,6 +22,7 @@ class CommentsWidget  extends Widget
 
     public $listId;
     public $listView;
+    public $listActions;
     public $listOptions = [
         'listRootTag' => 'ul',
         'listRootOptions' => [
@@ -36,7 +37,7 @@ class CommentsWidget  extends Widget
             'class' => 'media comment-reply'
         ],
         'editTimeout' => 3600, // time in seconds
-        'userPhotoSize' => 64, // 32/64/96/128px
+        'userPhotoSize' => 64, // 64/96/128px
         'useGravatar' => false,
         'userPhotoAlign' => 'left', // left/right
         'userPhotoOptions' => [
@@ -53,20 +54,33 @@ class CommentsWidget  extends Widget
     {
         $view = $this->getView();
         $this->_bundle = CommentsAsset::register($view);
+        $module = Yii::$app->comments->getModule();
 
-        if (is_null($this->formId) && ($id = $this->getId()))
+        if (!isset($this->formId) && ($id = $this->getId()))
             $this->formId = 'commentsForm-' . $id;
 
-        if (is_null($this->listId) && ($id = $this->getId()))
+        if (!isset($this->listId) && ($id = $this->getId()))
             $this->listId = 'commentsList-' . $id;
 
-        if (is_null($this->listView) && ($module = Yii::$app->comments->getModule()))
+        if (!isset($this->listView))
             $this->listView = $module->defaultListView;
 
-        if (is_null($this->formView) && ($module = Yii::$app->comments->getModule()))
+        if (!isset($this->listActions['edit']))
+            $this->listActions['edit'] = Url::to([$module->defaultController . '/edit']);
+
+        if (!isset($this->listActions['delete']))
+            $this->listActions['delete'] = Url::to([$module->defaultController . '/delete']);
+
+        if (!isset($this->listActions['abuse']))
+            $this->listActions['abuse'] = Url::to([$module->defaultController . '/abuse']);
+
+        if (!isset($this->listActions['reply']))
+            $this->listActions['reply'] = '#reply';
+
+        if (!isset($this->formView))
             $this->formView = $module->defaultFormView;
 
-        if (is_null($this->formAction) && ($module = Yii::$app->comments->getModule()))
+        if (!isset($this->formAction))
             $this->formAction = Url::to([$module->defaultController . '/create']);
 
         if ($comments = Yii::$app->comments->get($this->context, $this->target))
@@ -86,6 +100,7 @@ class CommentsWidget  extends Widget
                 'id' => $this->listId,
                 'form_id' => $this->formId,
                 'count' => $this->_comments['count'],
+                'actions' => $this->listActions,
                 'comments' => $this->_comments['items'],
                 'options' => (is_array($this->listOptions)) ? $this->listOptions : null,
                 'bundle' => $this->_bundle

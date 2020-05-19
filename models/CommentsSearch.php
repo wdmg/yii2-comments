@@ -11,6 +11,9 @@ use wdmg\comments\models\Comments;
  */
 class CommentsSearch extends Comments
 {
+
+    public $range;
+
     /**
      * {@inheritdoc}
      */
@@ -47,11 +50,11 @@ class CommentsSearch extends Comments
 
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
-            'sort'=> [
+            /*'sort'=> [
                 'defaultOrder' => [
                     'id' => SORT_DESC
                 ]
-            ]
+            ]*/
         ]);
 
         $this->load($params);
@@ -67,17 +70,23 @@ class CommentsSearch extends Comments
             ]);
         }*/
 
+        $query->select("*, COUNT(*) as count");
+
         // grid filtering conditions
         $query->andFilterWhere([
             'id' => $this->id,
             'parent_id' => $this->parent_id,
-            'context' => $this->context,
-            'target' => $this->target,
             'user_id' => $this->user_id,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'session' => $this->session,
         ]);
+
+        if ($this->context !== "*")
+            $query->andFilterWhere(['like', 'context', $this->context]);
+
+        if ($this->target !== "*")
+            $query->andFilterWhere(['like', 'target', $this->target]);
 
         if ($this->status !== "*")
             $query->andFilterWhere(['like', 'status', $this->status]);
@@ -86,6 +95,36 @@ class CommentsSearch extends Comments
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 
+        // Filter by range
+        if ($this->range !== "*") {
+            switch ($this->range) {
+                case '< 1000' :
+                    $query->having(['<', 'count', 1000]);
+                    break;
+
+                case '>= 1000' :
+                    $query->having(['>=', 'count', 1000]);
+                    break;
+
+                case '>= 10000' :
+                    $query->having(['>=', 'count', (1000 * 10)]);
+                    break;
+
+                case '> 100000' :
+                    $query->having(['>', 'count', (1000 * 100)]);
+                    break;
+
+                case '> 1000000' :
+                    $query->having(['>', 'count', (1000 * 1000)]);
+                    break;
+
+                case '> 10000000' :
+                    $query->having(['>', 'count', (1000 * 1000 * 10)]);
+                    break;
+            }
+        }
+
+        $query->groupBy(['context', 'target'])->orderBy('updated_at', SORT_DESC);
         return $dataProvider;
     }
 }

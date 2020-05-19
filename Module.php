@@ -43,6 +43,12 @@ class Module extends BaseModule
     public $description = "Tree comments system";
 
     public $defaultController = "comments/default";
+
+    /**
+     * @var string or array, the default routes to rendered page (use "/" - for root)
+     */
+    public $baseRoute = "/comments";
+
     public $defaultListView = '@vendor/wdmg/yii2-comments/widgets/views/_list';
     //public $defaultListView = '_list';
     public $defaultFormView = '@vendor/wdmg/yii2-comments/widgets/views/_form';
@@ -104,5 +110,74 @@ class Module extends BaseModule
                 'class' => \wdmg\comments\components\Comments::class
             ]
         ]);
+
+
+        /*if (!$this->isBackend() && !is_null($this->defaultController)) {
+
+            // Get language scheme if available
+            $custom = false;
+            $hide = false;
+            $scheme = null;
+            if (isset(Yii::$app->translations)) {
+                $custom = true;
+                $hide = Yii::$app->translations->module->hideDefaultLang;
+                $scheme = Yii::$app->translations->module->languageScheme;
+            }
+
+            // Add routes for frontend
+            switch ($scheme) {
+                case "after":
+
+                    $app->getUrlManager()->addRules([
+                        $this->baseRoute . '/<action:[\w-]+>/<lang:\w+>' => $this->defaultController . '/<action>',
+                        $this->baseRoute . '/<lang:\w+>' => $this->defaultController . '/index',
+                    ], true);
+
+                    if ($hide) {
+                        $app->getUrlManager()->addRules([
+                            $this->baseRoute . '/<action:[\w-]+>' => $this->defaultController . '/<action>',
+                            $this->baseRoute => $this->defaultController . '/index',
+                        ], true);
+                    }
+
+                    break;
+
+                case "query":
+
+                    $app->getUrlManager()->addRules([
+                        $this->baseRoute . '/<action:[\w-]+>' => $this->defaultController . '/<action>',
+                        $this->baseRoute => $this->defaultController . '/index',
+                    ], true);
+
+                    break;
+
+                case "subdomain":
+
+                    if ($host = $app->getRequest()->getHostName()) {
+                        $app->getUrlManager()->addRules([
+                            'http(s)?://' . $host. '/' . $this->baseRoute . '/<action:[\w-]+>' => $this->defaultController . '/<action>',
+                            'http(s)?://' . $host. '/' . $this->baseRoute => $this->defaultController . '/index',
+                        ], true);
+                    }
+
+                    break;
+
+                default:
+
+                    $app->getUrlManager()->addRules([
+                        '/<lang:\w+>' . $this->baseRoute . '/<alias:[\w-]+>' => $this->defaultController . '/view',
+                        '/<lang:\w+>' . $this->baseRoute => $this->defaultController . '/index',
+                    ], true);
+
+                    if ($hide || !$custom) {
+                        $app->getUrlManager()->addRules([
+                            $this->baseRoute . '/<alias:[\w-]+>' => $this->defaultController . '/view',
+                            $this->baseRoute => $this->defaultController . '/index',
+                        ], true);
+                    }
+
+                    break;
+            }
+        }*/
     }
 }

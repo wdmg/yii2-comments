@@ -19,29 +19,32 @@ $form = ActiveForm::begin([
 
 ?>
 <h4 class="page-header"><?= Yii::t('app/modules/comments','Leave a comment'); ?></h4>
+<?php
+    if ($user = Yii::$app->getUser()->isGuest) :
+?>
 <div class="row">
     <?php
-        if ($user = Yii::$app->getUser()) {
-            if ($user->isGuest) {
 
-                echo $form->field($model, 'name', [
-                    'labelOptions' => [
-                        'class' => 'control-label col-xs-12 col-xs-6 col-md-3'
-                    ],
-                    'template' => '{label}<div class="col-xs-12 col-sm-6 col-md-9">{input}</div><div class="col-xs-12 col-sm-6 col-sm-offset-6 col-md-9 col-md-offset-3">{error}</div>',
-                ])->textInput();
+        echo $form->field($model, 'name', [
+            'labelOptions' => [
+                'class' => 'control-label col-xs-12 col-xs-6 col-md-3'
+            ],
+            'template' => '{label}<div class="col-xs-12 col-sm-6 col-md-9">{input}</div><div class="col-xs-12 col-sm-6 col-sm-offset-6 col-md-9 col-md-offset-3">{error}</div>',
+        ])->textInput();
 
-                echo $form->field($model, 'email', [
-                    'labelOptions' => [
-                        'class' => 'control-label col-xs-12 col-xs-6 col-md-3'
-                    ],
-                    'template' => '{label}<div class="col-xs-12 col-sm-6 col-md-9">{input}</div><div class="col-xs-12 col-sm-6 col-sm-offset-6 col-md-9 col-md-offset-3">{error}</div>',
-                ])->textInput();
+        echo $form->field($model, 'email', [
+            'labelOptions' => [
+                'class' => 'control-label col-xs-12 col-xs-6 col-md-3'
+            ],
+            'template' => '{label}<div class="col-xs-12 col-sm-6 col-md-9">{input}</div><div class="col-xs-12 col-sm-6 col-sm-offset-6 col-md-9 col-md-offset-3">{error}</div>',
+        ])->textInput();
 
-            }
-        }
     ?>
 </div>
+<?php
+    endif;
+?>
+
 <?= $form->field($model, 'comment')->textarea(); ?>
 <div class="form-group">
     <?= $form->field($model, 'id')->hiddenInput()->label(false); ?>

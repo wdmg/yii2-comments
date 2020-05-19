@@ -3,6 +3,7 @@
 namespace wdmg\comments\models;
 
 use Yii;
+use yii\helpers\ArrayHelper;
 
 /**
  * This is the model class for table "{{%comments}}".
@@ -29,6 +30,8 @@ class Comments extends \yii\db\ActiveRecord
     const COMMENT_STATUS_DELETED = -1; // Comment has been deleted
     const COMMENT_STATUS_AWAITING = 0; // Comment has awaiting moderation
     const COMMENT_STATUS_PUBLISHED = 1; // Comment has been published
+
+    protected $count;
 
     /**
      * {@inheritdoc}
@@ -83,14 +86,19 @@ class Comments extends \yii\db\ActiveRecord
 
     public function init()
     {
+        if ($this->scenario == 'create')
+            $this->prepareAttributes();
+
         parent::init();
-        $this->prepareAttributes();
     }
 
     public function beforeValidate()
     {
-        $this->prepareAttributes();
-        $this->status = self::COMMENT_STATUS_PUBLISHED;
+        if ($this->scenario == 'create') {
+            $this->prepareAttributes();
+            $this->status = self::COMMENT_STATUS_PUBLISHED;
+        }
+
         return parent::beforeValidate();
     }
 
@@ -111,10 +119,94 @@ class Comments extends \yii\db\ActiveRecord
     }
 
     /**
+     * @return |null
+     */
+    public function getCount()
+    {
+        if ($this->count)
+            return $this->count;
+
+        return null;
+    }
+
+    /**
+     * @return array|\yii\db\ActiveRecord[]
+     */
+    public function getCounts()
+    {
+        return ArrayHelper::map(self::find()
+            ->select(['status', 'COUNT(*) AS count'])
+            ->where(['context' => $this->context, 'target' => $this->target])
+            ->groupBy('status')
+            ->asArray()
+            ->all(), 'status', 'count');
+    }
+
+    /**
      * @return \yii\db\ActiveQuery
      */
     public function getUser()
     {
         return $this->hasOne(\wdmg\users\models\Users::class, ['id' => 'user_id']);
+    }
+
+
+    /**
+     * @param bool $allContexts
+     * @return array
+     */
+    public function getContextsList($allContexts = false)
+    {
+        $list = [];
+        if ($allContexts) {
+            $list = [
+                '*' => Yii::t('app/modules/comments', 'All contexts')
+            ];
+        }
+
+        $contexts = self::find()->select('context', 'DISTINCT')->groupBy('context')->asArray()->all();
+        return ArrayHelper::merge($list, $contexts);
+    }
+
+    /**
+     * @param bool $allTargets
+     * @return array
+     */
+    public function getTargetsList($allTargets = false)
+    {
+        $list = [];
+        if ($allTargets) {
+            $list = [
+                '*' => Yii::t('app/modules/comments', 'All targets')
+            ];
+        }
+
+        $targets = self::find()->select('target', 'DISTINCT')->groupBy('target')->asArray()->all();
+        return ArrayHelper::merge($list, $targets);
+    }
+
+    /**
+     * @param bool $allRanges
+     * @return array
+     */
+    public function getCommentsRangeList($allRanges = false)
+    {
+        $list = [];
+        if ($allRanges) {
+            $list = [
+                '*' => Yii::t('app/modules/comments', 'All ranges')
+            ];
+        }
+
+        $list = ArrayHelper::merge($list, [
+            '< 1000' => Yii::t('app/modules/comments', 'Less than 1K comments'),
+            '>= 1000' => Yii::t('app/modules/comments', 'Over 1K comments'),
+            '>= 10000' => Yii::t('app/modules/comments', 'Over 10K comments'),
+            '> 100000' => Yii::t('app/modules/comments', 'Over 100K comments'),
+            '> 1000000' => Yii::t('app/modules/comments', 'More than 1M comments'),
+            '> 10000000' => Yii::t('app/modules/comments', 'More than 10M comments'),
+        ]);
+
+        return $list;
     }
 }

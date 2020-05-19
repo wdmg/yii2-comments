@@ -10,9 +10,9 @@ use yii\helpers\Url;
 
 <?php
 
-echo buildCommentsTree($comments, $id, $form_id, $options, $bundle);
+echo buildCommentsTree($comments, $id, $form_id, $actions, $options, $bundle);
 
-function buildCommentsTree($comments = [], $listId = null, $formId = null, $options = null, $bundle = null) {
+function buildCommentsTree($comments = [], $listId = null, $formId = null, $actions = null, $options = null, $bundle = null) {
 
     $output = '';
     $userId = Yii::$app->getUser()->getId();
@@ -85,18 +85,15 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
 
         }
 
-        if ($options['userPhotoSize'] == 32) {
-            $userDefaultPhoto = $bundle->baseUrl . "/images/user-default-32.png";
-            $userPhotoSizeClass = ["size-32x32"];
-        } else if ($options['userPhotoSize'] == 96) {
+        if ($options['userPhotoSize'] == 96) {
             $userDefaultPhoto = $bundle->baseUrl . "/images/user-default-96.png";
-            $userPhotoSizeClass = ["size-96x96"];
+            $userPhotoSizeClass = "size-96x96";
         } else if ($options['userPhotoSize'] == 128) {
             $userDefaultPhoto = $bundle->baseUrl . "/images/user-default-128.png";
-            $userPhotoSizeClass = ["size-128x128"];
+            $userPhotoSizeClass = "size-128x128";
         } else {
             $userDefaultPhoto = $bundle->baseUrl . "/images/user-default-64.png";
-            $userPhotoSizeClass = ["size-64x64"];
+            $userPhotoSizeClass = "size-64x64";
         }
 
         if ($comment['name'] == 'Bob')
@@ -114,13 +111,13 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
         if (isset($comment['photo']))
             $photo = Html::img(
                 $comment['photo'],
-                ArrayHelper::merge($userPhotoOptions, $userPhotoSizeClass, [
+                ArrayHelper::merge($userPhotoOptions, [
                     'alt' => $comment['name'],
                 ])
             );
         else
             $photo = Html::img($userDefaultPhoto,
-                ArrayHelper::merge($userPhotoOptions, $userPhotoSizeClass, [
+                ArrayHelper::merge($userPhotoOptions, [
                     'alt' => $comment['name'],
                 ])
             );
@@ -131,7 +128,7 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
             $link = $photo;
 
         if ($userPhotoAlign == 'left') {
-            $item .= Html::tag('div', $link, ['class' => 'media-left']);
+            $item .= Html::tag('div', $link, ['class' => 'media-left ' . $userPhotoSizeClass]);
         }
 
         $item .= '<div class="media-body">';
@@ -143,7 +140,7 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
 
         $item .= Html::tag('small', Html::tag('i', '&nbsp;', [
                 'class' => "fa fa-clock fa-fw"
-            ]) . \Yii::$app->formatter->asDatetime($comment['updated_at'], 'dd MMMM в HH:mm'), [
+            ]) . \Yii::$app->formatter->asDatetime($comment['updated_at'], "dd MMMM 'at' HH:mm"), [
             'class' => "pull-right text-muted"
         ]);
 
@@ -158,10 +155,15 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
         $item .= '<div class="media-footer">';
         if ($editTimeout && !is_null($userId)) {
             if (
-                ((intval($comment['user_id']) == $userId) && !is_null($userId)) ||
-                ($comment['user_id'] == \Yii::$app->session->getId())
+                (
+                    ((intval($comment['user_id']) == $userId) && !is_null($userId)) ||
+                    ($comment['user_id'] == \Yii::$app->session->getId())
+                ) && isset($actions['delete'])
             ) {
-                $item .= Html::a('Delete', '#delete', [
+                $item .= Html::a(Yii::t('app/modules/comments','Delete'), [
+                    $actions['delete'],
+                    'id' => $comment['id']
+                ], [
                     'class' => 'btn btn-sm btn-link pull-right',
                     'data' => [
                         'toggle' => 'comments-delete',
@@ -169,8 +171,11 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
                     ]
                 ]);
 
-                if (intval($editTimeout) >= (time() - strtotime($comment['updated_at']))) {
-                    $item .= Html::a('Edit', '#edit', [
+                if (intval($editTimeout) >= (time() - strtotime($comment['updated_at'])) && isset($actions['edit'])) {
+                    $item .= Html::a(Yii::t('app/modules/comments','Edit'), [
+                        $actions['edit'],
+                        'id' => $comment['id']
+                    ], [
                         'class' => 'btn btn-sm btn-link pull-right',
                         'data' => [
                             'toggle' => 'comments-edit',
@@ -180,8 +185,11 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
                 }
             }
         }
-        if (intval($comment['user_id']) !== $userId) {
-            $item .= Html::a('Abuse', '#abuse', [
+        if (intval($comment['user_id']) !== $userId && isset($actions['abuse'])) {
+            $item .= Html::a(Yii::t('app/modules/comments','Abuse'), [
+                $actions['abuse'],
+                'id' => $comment['id']
+            ], [
                 'class' => 'btn btn-sm btn-link pull-left',
                 'data' => [
                     'toggle' => 'comments-abuse',
@@ -189,13 +197,18 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
                 ]
             ]);
 
-            $item .= Html::a('Reply', '#reply', [
-                'class' => 'btn btn-sm btn-link pull-right',
-                'data' => [
-                    'toggle' => 'comments-reply',
-                    'key' => $comment['id']
-                ]
-            ]);
+            if (isset($actions['reply'])) {
+                $item .= Html::a(Yii::t('app/modules/comments','Reply'), [
+                    $actions['reply'],
+                    'id' => $comment['id']
+                ], [
+                    'class' => 'btn btn-sm btn-link pull-right',
+                    'data' => [
+                        'toggle' => 'comments-reply',
+                        'key' => $comment['id']
+                    ]
+                ]);
+            }
 
         } else {
             $item .= '&nbsp;';
@@ -205,7 +218,7 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
 
         if (isset($comment['items'])) {
             if (is_array($comment['items'])) {
-                $item .= buildCommentsTree($comment['items'], $listId, $formId, $options, $bundle);
+                $item .= buildCommentsTree($comment['items'], $listId, $formId, $actions, $options, $bundle);
             }
         }
 
@@ -240,3 +253,5 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $opti
     else
         return $output;
 }
+
+?>
