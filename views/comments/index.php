@@ -1,5 +1,6 @@
 <?php
 
+use wdmg\helpers\StringHelper;
 use wdmg\widgets\SelectInput;
 use yii\helpers\Html;
 use yii\grid\GridView;
@@ -53,7 +54,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     ]
                 ]),
             ],
-            'comment:text',
+            [
+                'attribute' => 'comment',
+                'format' => 'html',
+                'value' => function($data) {
+                    $comment = StringHelper::truncateWords(StringHelper::stripTags($data->comment, "", " "),12,'…');
+                    if (!is_null($data->parent_id))
+                        return Html::tag('span', "↳", ['class' => "text-muted"]) .
+                            "&nbsp;" . Html::tag('em', $comment);
+                    else
+                        return $comment;
+                }
+            ],
             [
                 'attribute' => 'count',
                 'format' => 'raw',
@@ -82,11 +94,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     if (isset($counts[$data::COMMENT_STATUS_PUBLISHED]))
                         $published = $counts[$data::COMMENT_STATUS_PUBLISHED];
 
-                    $counters[] = Html::a($published, ['comments/list', 'status' => $data::COMMENT_STATUS_PUBLISHED], [
+                    $counters[] = Html::a($published, [
+                        'comments/list',
+                        'status' => $data::COMMENT_STATUS_PUBLISHED,
+                        'context' => $data->context,
+                        'target' => $data->target,
+                    ], [
                         'class' => "label label-success",
                         'title' => 'Comments has been published',
                         'disabled' => ($published) ? false : true,
-                        'data-toggle' => "tooltip"
+                        'data' => [
+                            'toggle' => "tooltip",
+                            'pjax' => 0
+                        ]
                     ]);
 
 
@@ -94,11 +114,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     if (isset($counts[$data::COMMENT_STATUS_AWAITING]))
                         $awaiting = $counts[$data::COMMENT_STATUS_AWAITING];
 
-                    $counters[] = Html::a($awaiting, ['comments/list', 'status' => $data::COMMENT_STATUS_AWAITING], [
+                    $counters[] = Html::a($awaiting, [
+                        'comments/list',
+                        'status' => $data::COMMENT_STATUS_AWAITING,
+                        'context' => $data->context,
+                        'target' => $data->target,
+                    ], [
                         'class' => "label label-warning",
                         'title' => 'Comments has awaiting moderation',
                         'disabled' => ($awaiting) ? false : true,
-                        'data-toggle' => "tooltip"
+                        'data' => [
+                            'toggle' => "tooltip",
+                            'pjax' => 0
+                        ]
                     ]);
 
 
@@ -106,11 +134,19 @@ $this->params['breadcrumbs'][] = $this->title;
                     if (isset($counts[$data::COMMENT_STATUS_DELETED]))
                         $deleted = $counts[$data::COMMENT_STATUS_DELETED];
 
-                    $counters[] = Html::a($deleted, ['comments/list', 'status' => $data::COMMENT_STATUS_DELETED], [
+                    $counters[] = Html::a($deleted, [
+                        'comments/list',
+                        'status' => $data::COMMENT_STATUS_DELETED,
+                        'context' => $data->context,
+                        'target' => $data->target,
+                    ], [
                         'class' => "label label-default",
                         'title' => 'Comments has been deleted',
                         'disabled' => ($deleted) ? false : true,
-                        'data-toggle' => "tooltip"
+                        'data' => [
+                            'toggle' => "tooltip",
+                            'pjax' => 0
+                        ]
                     ]);
 
 
@@ -118,32 +154,39 @@ $this->params['breadcrumbs'][] = $this->title;
                     if (isset($counts[$data::COMMENT_STATUS_REJECTED]))
                         $rejected = $counts[$data::COMMENT_STATUS_REJECTED];
 
-                    $counters[] = Html::a($rejected, ['comments/list', 'status' => $data::COMMENT_STATUS_REJECTED], [
+                    $counters[] = Html::a($rejected, [
+                        'comments/list',
+                        'status' => $data::COMMENT_STATUS_REJECTED,
+                        'context' => $data->context,
+                        'target' => $data->target,
+                    ], [
                         'class' => "label label-danger",
                         'title' => 'Comments has been rejected',
                         'disabled' => ($rejected) ? false : true,
-                        'data-toggle' => "tooltip"
+                        'data' => [
+                            'toggle' => "tooltip",
+                            'pjax' => 0
+                        ]
                     ]);
 
                     if ($data->count)
-                        $counters[] = Html::a($data->count, ['comments/list'], [
+                        $counters[] = Html::a($data->count, [
+                            'comments/list',
+                            'context' => $data->context,
+                            'target' => $data->target
+                        ], [
                             'class' => "label label-info",
                             'title' => 'All comments',
                             'disabled' => ($data->count) ? false : true,
-                            'data-toggle' => "tooltip"
+                            'data' => [
+                                'toggle' => "tooltip",
+                                'pjax' => 0
+                            ]
                         ]);
 
                     return implode(" ", $counters);
                 }
             ],
-            /*'name',
-            'email:email',
-            'comment:ntext',
-            'user_id',
-            'status',
-            'session',
-            'created_at',
-            'updated_at',*/
         ],
         'pager' => [
             'options' => [

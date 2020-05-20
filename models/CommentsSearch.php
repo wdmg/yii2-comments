@@ -21,7 +21,7 @@ class CommentsSearch extends Comments
     {
         return [
             [['id', 'parent_id', 'user_id', 'status'], 'integer'],
-            [['context', 'target', 'name', 'email', 'comment'], 'string'],
+            [['context', 'target', 'name', 'email', 'comment', 'range'], 'string'],
             [['created_at', 'updated_at', 'session'], 'safe'],
         ];
     }
@@ -31,8 +31,10 @@ class CommentsSearch extends Comments
      */
     public function scenarios()
     {
-        // bypass scenarios() implementation in the parent class
-        return Model::scenarios();
+        $scenarios = Model::scenarios();
+        $scenarios['grouped'] = ['context', 'comment', 'target', 'range'];
+
+        return $scenarios;
     }
 
     /**
@@ -70,7 +72,8 @@ class CommentsSearch extends Comments
             ]);
         }*/
 
-        $query->select("*, COUNT(*) as count");
+        if ($this->scenario == 'grouped')
+            $query->select("*, COUNT(*) as count");
 
         // grid filtering conditions
         $query->andFilterWhere([
@@ -83,20 +86,21 @@ class CommentsSearch extends Comments
         ]);
 
         if ($this->context !== "*")
-            $query->andFilterWhere(['like', 'context', $this->context]);
+            $query->andFilterWhere(['context' => $this->context]);
 
         if ($this->target !== "*")
-            $query->andFilterWhere(['like', 'target', $this->target]);
+            $query->andFilterWhere(['target' => $this->target]);
 
         if ($this->status !== "*")
-            $query->andFilterWhere(['like', 'status', $this->status]);
+            $query->andFilterWhere(['status' => $this->status]);
+
 
         $query->andFilterWhere(['like', 'name', $this->name])
             ->andFilterWhere(['like', 'email', $this->email])
             ->andFilterWhere(['like', 'comment', $this->comment]);
 
         // Filter by range
-        if ($this->range !== "*") {
+        if ($this->scenario == 'grouped' && $this->range !== "*") {
             switch ($this->range) {
                 case '< 1000' :
                     $query->having(['<', 'count', 1000]);
@@ -124,7 +128,12 @@ class CommentsSearch extends Comments
             }
         }
 
-        $query->groupBy(['context', 'target'])->orderBy('updated_at', SORT_DESC);
+        if ($this->scenario == 'grouped') {
+            $query->groupBy(['context', 'target'])->orderBy('updated_at', SORT_DESC);
+        } else {
+            $query->groupBy(['id', 'parent_id'])->orderBy('updated_at', SORT_DESC);
+        }
+
         return $dataProvider;
     }
 }

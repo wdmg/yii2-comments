@@ -5,6 +5,7 @@ namespace wdmg\comments\controllers;
 use Yii;
 use wdmg\comments\models\Comments;
 use wdmg\comments\models\CommentsSearch;
+use yii\data\ActiveDataProvider;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -61,9 +62,30 @@ class CommentsController extends Controller
     public function actionIndex()
     {
         $searchModel = new CommentsSearch();
+        $searchModel->scenario = "grouped";
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
 
         return $this->render('index', [
+            'searchModel' => $searchModel,
+            'dataProvider' => $dataProvider,
+        ]);
+    }
+
+    public function actionList($context = null, $target = null, $status = null)
+    {
+        if (is_null($context) || is_null($target))
+            $this->redirect(['comments/index']);
+
+        $searchModel = new CommentsSearch();
+        $params = Yii::$app->request->queryParams;
+        if (!isset($params['CommentsSearch'])) {
+            $params['CommentsSearch'] = Yii::$app->request->queryParams;
+        }
+        $dataProvider = $searchModel->search($params);
+
+        return $this->render('list', [
+            'context' => $context,
+            'target' => $target,
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
         ]);
@@ -127,11 +149,107 @@ class CommentsController extends Controller
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
      */
-    public function actionDelete($id)
+    public function actionDelete($id, $context = null, $target = null)
     {
         $this->findModel($id)->delete();
+        return $this->redirect(['comments/list', 'context' => $context, 'target' => $target]);
+    }
 
-        return $this->redirect(['index']);
+    public function actionBatch($action = null, $attribute = null, $context = null, $target = null, $value = null)
+    {
+        if (Yii::$app->request->isPost) {
+            $selection = Yii::$app->request->post('selected', null);
+            if (!is_null($selection)) {
+                if ($action == 'change' && !is_null($attribute)) {
+
+                    $updated = Comments::updateAll([$attribute => intval($value)], ['id' => $selection]);
+                    if ($updated) {
+                        // Log activity
+                        $this->module->logActivity(
+                            $updated . ' comment(s) successfully updated.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+
+                        Yii::$app->getSession()->setFlash(
+                            'success',
+                            Yii::t(
+                                'app/modules/comments',
+                                'OK! {count, number} {count, plural, one{comment} few{comments} other{comments}} successfully {count, plural, one{updated} few{updated} other{updated}}.',
+                                [
+                                    'count' => $updated
+                                ]
+                            )
+                        );
+                    } else {
+                        // Log activity
+                        $this->module->logActivity(
+                            'An error occurred while updating a comment(s).',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+
+                        Yii::$app->getSession()->setFlash(
+                            'danger',
+                            Yii::t(
+                                'app/modules/comments',
+                                'An error occurred while updating a comment(s).'
+                            )
+                        );
+                    }
+
+                } elseif ($action == 'delete') {
+
+                    $deleted = 0;
+                    $models = Comments::findAll(['id' => $selection]);
+                    foreach($models as $model) {
+                        if ($model->delete())
+                            $deleted++;
+                    }
+
+                    if ($deleted) {
+                        // Log activity
+                        $this->module->logActivity(
+                            $deleted . ' comment(s) successfully deleted.',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'success',
+                            1
+                        );
+
+                        Yii::$app->getSession()->setFlash(
+                            'success',
+                            Yii::t(
+                                'app/modules/comments',
+                                'OK! {count, number} {count, plural, one{comment} few{items} other{comments}} successfully {count, plural, one{deleted} few{deleted} other{deleted}}.',
+                                [
+                                    'count' => $deleted
+                                ]
+                            )
+                        );
+                    } else {
+                        // Log activity
+                        $this->module->logActivity(
+                            'An error occurred while deleting a comment(s).',
+                            $this->uniqueId . ":" . $this->action->id,
+                            'danger',
+                            1
+                        );
+
+                        Yii::$app->getSession()->setFlash(
+                            'danger',
+                            Yii::t(
+                                'app/modules/comments',
+                                'An error occurred while deleting a comment(s).'
+                            )
+                        );
+                    }
+                }
+            }
+        }
+
+        return $this->redirect(['comments/list', 'context' => $context, 'target' => $target]);
     }
 
     /**

@@ -165,7 +165,7 @@ class Comments extends \yii\db\ActiveRecord
         }
 
         $contexts = self::find()->select('context', 'DISTINCT')->groupBy('context')->asArray()->all();
-        return ArrayHelper::merge($list, $contexts);
+        return ArrayHelper::merge($list, ArrayHelper::map($contexts, 'context', 'context'));
     }
 
     /**
@@ -182,7 +182,7 @@ class Comments extends \yii\db\ActiveRecord
         }
 
         $targets = self::find()->select('target', 'DISTINCT')->groupBy('target')->asArray()->all();
-        return ArrayHelper::merge($list, $targets);
+        return ArrayHelper::merge($list, ArrayHelper::map($targets, 'target', 'target'));
     }
 
     /**
@@ -208,5 +208,23 @@ class Comments extends \yii\db\ActiveRecord
         ]);
 
         return $list;
+    }
+
+
+    public function getStatusesList($allStatuses = false)
+    {
+        $list = [];
+        if ($allStatuses) {
+            $list = [
+                '*' => Yii::t('app/modules/comments', 'All statuses')
+            ];
+        }
+
+        return ArrayHelper::merge($list, [
+            self::COMMENT_STATUS_REJECTED => Yii::t('app/modules/comments', 'Rejected'),
+            self::COMMENT_STATUS_DELETED => Yii::t('app/modules/comments', 'Deleted'),
+            self::COMMENT_STATUS_AWAITING => Yii::t('app/modules/comments', 'Awaiting moderation'),
+            self::COMMENT_STATUS_PUBLISHED => Yii::t('app/modules/comments', 'Published'),
+        ]);
     }
 }

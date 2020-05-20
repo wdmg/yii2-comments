@@ -11,6 +11,14 @@ return [
     'Last page' => 'Последняя страница',
     '&larr; Prev page' => '&larr; Предыдущая страница',
     'Next page &rarr;' => 'Следующая страница &rarr;',
+    '&larr; Back to list' => '&larr; Назад к списку',
+
+    'Comments list' => "Список комментариев",
+    'Context `{context}`, target `{target}`' => "Контекст `{context}`, цель `{target}`",
+    'OK! {count, number} {count, plural, one{comment} few{comments} other{comments}} successfully {count, plural, one{updated} few{updated} other{updated}}.' => "OK! {count, number} {count, plural, one{комментарий} few{комментария} other{комментариев}} успешно {count, plural, one{обновлен} few{обновлено} other{обновлены}}.",
+    'An error occurred while updating a comment(s).' => "Произошла ошибка при обновлении комментария(ев).",
+    'OK! {count, number} {count, plural, one{comment} few{items} other{comments}} successfully {count, plural, one{deleted} few{deleted} other{deleted}}.' => "OK! {count, number} {count, plural, one{комментарий} few{комментария} other{комментариев}} успешно {count, plural, one{удален} few{удалено} other{удалены}}.",
+    'An error occurred while deleting a comment(s).' => "Произошла ошибка при удалении комментария(ев).",
 
     'ID' => "ИД",
     'Parent ID' => "ИД родителя",
@@ -35,6 +43,10 @@ return [
     'Delete' => "Удалить",
     'Manage' => "Управление",
 
+    'Author' => "Автор",
+    'User: {username}' => "Пользователь: {username}",
+    'Guest' => "Гость",
+
     'All contexts' => "Все контексты",
     'All targets' => "Все цели",
     'All ranges' => "Все диапазоны",
@@ -44,7 +56,18 @@ return [
     'Over 100K comments' => "Более 100К комментариев",
     'More than 1M comments' => "Более 1М комментариев",
     'More than 10M comments' => "Более 10М комментариев",
+    'All statuses' => "Все статусы",
+    'Rejected' => "Отклонён",
+    'Deleted' => "Удалён",
+    'Awaiting moderation' => "Ожидает модерации",
+    'On moderation' => "На модерации",
+    'Published' => "Опубликован",
 
+    'Are you sure you want to delete the comment?' => "Вы уверены, что желаете удалить комментарий?",
+
+    'Select action' => "Выберите действие",
+    'Change status to: {name}' => "Изменить статус на: {name}",
+    'Delete selected' => "Удалить выбранное",
 ];
 
 ?>
