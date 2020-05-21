@@ -18,7 +18,34 @@ class CommentsWidget  extends Widget
     public $formId;
     public $formView;
     public $formAction;
-    public $formOptions;
+    public $formOptions = [
+        'headerTag' => null,
+        'headerLabel' => null,
+        'headerOptions' => [
+            'class' => "page-header"
+        ],
+        'formOptions' => null,
+        'nameLabel' => null,
+        'nameOptions' => [
+            'labelOptions' => [
+                'class' => 'control-label col-xs-12 col-xs-6 col-md-3',
+            ],
+            'template' => '{label}<div class="col-xs-12 col-sm-6 col-md-9">{input}</div><div class="col-xs-12 col-sm-6 col-sm-offset-6 col-md-9 col-md-offset-3">{error}</div>',
+        ],
+        'emailLabel' => null,
+        'emailOptions' => [
+            'labelOptions' => [
+                'class' => 'control-label col-xs-12 col-xs-6 col-md-3',
+            ],
+            'template' => '{label}<div class="col-xs-12 col-sm-6 col-md-9">{input}</div><div class="col-xs-12 col-sm-6 col-sm-offset-6 col-md-9 col-md-offset-3">{error}</div>',
+        ],
+        'commentLabel' => null,
+        'commentOptions' => [],
+        'submitOptions' => [
+            'class' => "btn btn-primary"
+        ]
+    ];
+    public $formTemplate = '<h4 class="page-header">{header}</h4><div class="row">{name}{email}</div>{comment}<div class="form-group">{submit}</div>';
 
     public $listId;
     public $listView;
@@ -112,6 +139,7 @@ class CommentsWidget  extends Widget
                 'id' => $this->formId,
                 'action' => $this->formAction,
                 'options' => (is_array($this->formOptions)) ? $this->formOptions : null,
+                'template' => (!is_null($this->formTemplate)) ? $this->formTemplate : null,
                 'model' => $this->_model,
                 'bundle' => $this->_bundle
             ]);

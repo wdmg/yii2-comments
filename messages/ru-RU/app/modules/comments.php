@@ -46,6 +46,12 @@ return [
     'Author' => "Автор",
     'User: {username}' => "Пользователь: {username}",
     'Guest' => "Гость",
+    'Guest: {name}' => "Гость: {name}",
+
+    'View comment' => "Просмотр комментария",
+    'Update comment' => "Изменить комментарий",
+    'Close' => "Закрыть",
+    'Save' => "Сохранить",
 
     'All contexts' => "Все контексты",
     'All targets' => "Все цели",
@@ -63,7 +69,7 @@ return [
     'On moderation' => "На модерации",
     'Published' => "Опубликован",
 
-    'Are you sure you want to delete the comment?' => "Вы уверены, что желаете удалить комментарий?",
+    'Are you sure you want to permanently delete the comment? All replies to this comment will also be deleted.' => "Вы уверены, что желаете безвозвратно удалить комментарий? Все ответы на данный комментарий также будут удалены.",
 
     'Select action' => "Выберите действие",
     'Change status to: {name}' => "Изменить статус на: {name}",

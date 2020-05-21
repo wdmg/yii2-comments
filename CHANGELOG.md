@@ -2,6 +2,8 @@ Changelog
 =========
 
 ## 1.*
+ * View comment, edit comment form
+ * Form template in CommentsWidget rebuild.
  * Added _form and _list views for widget
  * Added assets and CommentsWidget
  * Migrations rebase, refactoring model

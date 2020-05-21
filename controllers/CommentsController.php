@@ -2,6 +2,7 @@
 
 namespace wdmg\comments\controllers;
 
+use wdmg\comments\widgets\CommentsWidget;
 use Yii;
 use wdmg\comments\models\Comments;
 use wdmg\comments\models\CommentsSearch;
@@ -99,32 +100,18 @@ class CommentsController extends Controller
      */
     public function actionView($id)
     {
-        return $this->render('view', [
-            'model' => $this->findModel($id),
-        ]);
-    }
-
-    /**
-     * Creates a new Comments model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = new Comments();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('_view', [
+                'model' => $this->findModel($id),
+            ]);
         }
 
-        return $this->render('create', [
-            'model' => $model,
-        ]);
+        return $this->redirect(['comments/index']);
     }
 
     /**
      * Updates an existing Comments model.
-     * If update is successful, the browser will be redirected to the 'view' page.
+     * If update is successful, the browser will be redirected to the 'comments/list' page.
      * @param integer $id
      * @return mixed
      * @throws NotFoundHttpException if the model cannot be found
@@ -132,14 +119,20 @@ class CommentsController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['comments/list'], [
+                'context' => $model->context,
+                'target' => $model->target
+            ]);
         }
 
-        return $this->render('update', [
-            'model' => $model,
-        ]);
+        if (Yii::$app->request->isAjax) {
+            return $this->renderAjax('_form', [
+                'model' => $model,
+            ]);
+        }
+
+        return $this->redirect(['comments/list']);
     }
 
     /**
@@ -151,7 +144,8 @@ class CommentsController extends Controller
      */
     public function actionDelete($id, $context = null, $target = null)
     {
-        $this->findModel($id)->delete();
+        Comments::deleteAll(['parent_id' => $id]);
+        Comments::deleteAll(['id' => $id]);
         return $this->redirect(['comments/list', 'context' => $context, 'target' => $target]);
     }
 
@@ -203,8 +197,16 @@ class CommentsController extends Controller
                 } elseif ($action == 'delete') {
 
                     $deleted = 0;
+
+                    $models = Comments::findAll(['parent_id' => $selection]);
+                    foreach($models as $model) {
+                        if ($model->delete())
+                            $deleted++;
+                    }
+
                     $models = Comments::findAll(['id' => $selection]);
                     foreach($models as $model) {
+
                         if ($model->delete())
                             $deleted++;
                     }

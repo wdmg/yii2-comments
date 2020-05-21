@@ -2,8 +2,10 @@
 
 use wdmg\helpers\StringHelper;
 use wdmg\widgets\SelectInput;
+use yii\bootstrap\Modal;
 use yii\helpers\Html;
 use yii\grid\GridView;
+use yii\helpers\Url;
 use yii\widgets\Pjax;
 
 /* @var $this yii\web\View */
@@ -70,8 +72,13 @@ $this->params['breadcrumbs'][] = Yii::t('app/modules/comments','Comments list');
                         ]);
                     } elseif ($data->user_id) {
                         $output .= $data->user_id;
-                    } else {
-                        $output .= Yii::t('app/modules/comments','Guest');
+                    } elseif ($data->name && $data->email) {
+                        $output .= Yii::t('app/modules/comments','Guest: {name}', [
+                            'name' => Html::mailto($data->name, Url::to($data->email), [
+                                'target' => '_blank',
+                                'data-pjax' => 0
+                            ])
+                        ]);
                     }
 
                     if (!empty($output))
@@ -120,10 +127,6 @@ $this->params['breadcrumbs'][] = Yii::t('app/modules/comments','Comments list');
                     return $data->status;
                 }
             ],
-            /*'session',*/
-            /*'created_at',
-            'updated_at',*/
-
             [
                 'class' => 'yii\grid\ActionColumn',
                 'header' => Yii::t('app/modules/media','Actions'),
@@ -142,7 +145,25 @@ $this->params['breadcrumbs'][] = Yii::t('app/modules/comments','Comments list');
                             'target' => $data->target
                         ], [
                             'data-method' => 'POST',
-                            'data-confirm' => Yii::t('app/modules/comments', 'Are you sure you want to delete the comment?')
+                            'data-confirm' => Yii::t('app/modules/comments', 'Are you sure you want to delete the comment? All replies to this comment will also be deleted.')
+                        ]);
+                    },
+                    'view' => function($url, $data, $key) {
+                        return Html::a(Html::tag('span', '', ['class' => "glyphicon glyphicon-eye-open"]), [
+                            'comments/view',
+                            'id' => $key,
+                            'context' => $data->context,
+                            'target' => $data->target
+                        ], [
+                            'class' => "comments-view-link"
+                        ]);
+                    },
+                    'update' => function($url, $data, $key) {
+                        return Html::a(Html::tag('span', '', ['class' => "glyphicon glyphicon-edit"]), [
+                            'comments/update',
+                            'id' => $key
+                        ], [
+                            'class' => "comments-update-link"
                         ]);
                     }
                 ]
@@ -214,6 +235,7 @@ $this->params['breadcrumbs'][] = Yii::t('app/modules/comments','Comments list');
     </div>
     <?php Pjax::end(); ?>
 </div>
+
 <?php $this->registerJs(<<< JS
     $('body').delegate('#commentsList input[type="checkbox"]', 'click', function(event) {
         setTimeout(function() {
@@ -244,6 +266,49 @@ $this->params['breadcrumbs'][] = Yii::t('app/modules/comments','Comments list');
             });
         }
     });
+    $('body').delegate('.comments-view-link', 'click', function(event) {
+        event.preventDefault();
+        $.get(
+            $(this).attr('href'),
+            function (data) {
+                $('#commentsView .modal-body').html($(data).remove('.modal-footer'));
+                if ($(data).find('.modal-footer').length > 0) {
+                    $('#commentsView').find('.modal-footer').remove();
+                    $('#commentsView .modal-content').append($(data).find('.modal-footer'));
+                }
+                $('#commentsView').modal();
+            }  
+        );
+    });
+    $('body').delegate('.comments-update-link', 'click', function(event) {
+        event.preventDefault();
+        $.get(
+            $(this).attr('href'),
+            function (data) {
+                $('#commentsUpdate .modal-body').html($(data).remove('.modal-footer'));
+                if ($(data).find('.modal-footer').length > 0) {
+                    $('#commentsUpdate').find('.modal-footer').remove();
+                    $('#commentsUpdate .modal-content').append($(data).find('.modal-footer'));
+                }
+                $('#commentsUpdate').modal();
+            }  
+        );
+    });
 JS
 ); ?>
+
+<?php Modal::begin([
+    'id' => 'commentsView',
+    'header' => '<h4 class="modal-title">'.Yii::t('app/modules/comments', 'View comment').'</h4>',
+]); ?>
+<?php echo $this->render('_view', ['model' => $searchModel]); ?>
+<?php Modal::end(); ?>
+
+<?php Modal::begin([
+    'id' => 'commentsUpdate',
+    'header' => '<h4 class="modal-title">'.Yii::t('app/modules/comments', 'Update comment').'</h4>',
+]); ?>
+<?php echo $this->render('_form', ['model' => $searchModel]); ?>
+<?php Modal::end(); ?>
+
 <?php echo $this->render('../_debug'); ?>

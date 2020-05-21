@@ -96,12 +96,6 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $acti
             $userPhotoSizeClass = "size-64x64";
         }
 
-        if ($comment['name'] == 'Bob')
-            $comment['photo'] = 'https://bootdey.com/img/Content/avatar/avatar6.png';
-
-        if ($comment['name'] == 'Alice')
-            $comment['photo'] = 'https://bootdey.com/img/Content/avatar/avatar5.png';
-
         if ($options['useGravatar'] && isset($comment['email']) && !isset($comment['photo'])) {
             $hash = md5(strtolower(trim($comment['email'])));
             $defaultPhoto = urlencode(Url::to($userDefaultPhoto, true));

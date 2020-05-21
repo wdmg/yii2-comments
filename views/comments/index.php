@@ -186,7 +186,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                     return implode(" ", $counters);
                 }
-            ],
+            ]
         ],
         'pager' => [
             'options' => [

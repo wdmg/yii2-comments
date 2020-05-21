@@ -61,7 +61,12 @@ class Comments extends Component
         $query = $this->model::find()->where([
             'context' => $context,
             'target' => $target,
+        ]);
+
+        $query->andWhere([
             'status' => $this->model::COMMENT_STATUS_PUBLISHED
+        ])->orWhere([
+            'status' => $this->model::COMMENT_STATUS_DELETED
         ]);
 
         if ($query->exists()) {
