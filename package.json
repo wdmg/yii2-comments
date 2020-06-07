@@ -1,6 +1,6 @@
 {
   "name": "yii2-comments-assets",
-  "version": "0.0.10",
+  "version": "1.0.0",
   "description": "Comments Module Assets",
   "main": "Gruntfile.js",
   "scripts": {

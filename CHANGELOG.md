@@ -1,7 +1,8 @@
 Changelog
 =========
 
-## 1.*
+## 1.0.0 (2020-06-07)
+ * Default controller for frontend
  * View comment, edit comment form
  * Form template in CommentsWidget rebuild.
  * Added _form and _list views for widget

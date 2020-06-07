@@ -31,6 +31,11 @@ class Comments extends \yii\db\ActiveRecord
     const COMMENT_STATUS_AWAITING = 0; // Comment has awaiting moderation
     const COMMENT_STATUS_PUBLISHED = 1; // Comment has been published
 
+    const COMMENT_SCENARIO_CREATE = 'create';
+    const COMMENT_SCENARIO_UPDATE = 'update';
+    const COMMENT_SCENARIO_LISTING = 'listing';
+
+    protected $module;
     protected $count;
 
     /**
@@ -47,20 +52,31 @@ class Comments extends \yii\db\ActiveRecord
     public function rules()
     {
         $rules = [
+            [['id'], 'integer', 'on' => self::COMMENT_SCENARIO_UPDATE],
             [['parent_id', 'user_id', 'status'], 'integer'],
-            [['context', 'target', 'name', 'email', 'comment', 'session'], 'required'],
+            [['context', 'target', 'name', 'email', 'comment'], 'required'],
             [['context', 'name'], 'string', 'min' => 3, 'max' => 32],
             ['email', 'email'],
             ['comment', 'string'],
             ['target', 'string', 'max' => 128],
             ['status', 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['created_at', 'updated_at', 'session'], 'safe'],
         ];
 
         if (class_exists('\wdmg\users\models\Users'))
             $rules[] = [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => \wdmg\users\models\Users::class, 'targetAttribute' => ['user_id' => 'id']];
             
         return $rules;
+    }
+
+
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+        $scenarios[self::COMMENT_SCENARIO_CREATE] = ['parent_id', 'user_id', 'status', 'context', 'target', 'name', 'email', 'comment'];
+        $scenarios[self::COMMENT_SCENARIO_UPDATE] = ['id', 'context', 'target', 'comment'];
+        $scenarios[self::COMMENT_SCENARIO_LISTING] = ['parent_id', 'user_id', 'status', 'context', 'target', 'name', 'email', 'comment'];
+        return $scenarios;
     }
 
     /**
@@ -84,22 +100,50 @@ class Comments extends \yii\db\ActiveRecord
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function init()
     {
-        if ($this->scenario == 'create')
+        if (!($this->module = Yii::$app->getModule('admin/comments')))
+            $this->module = Yii::$app->getModule('comments');
+
+        if (!$this->module->isBackend())
+            $this->setScenario(self::COMMENT_SCENARIO_LISTING);
+
+        if (in_array($this->scenario, [self::COMMENT_SCENARIO_CREATE, self::COMMENT_SCENARIO_UPDATE, self::COMMENT_SCENARIO_LISTING]))
             $this->prepareAttributes();
 
         parent::init();
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function beforeValidate()
     {
-        if ($this->scenario == 'create') {
+        if ($this->scenario == self::COMMENT_SCENARIO_CREATE || $this->scenario == self::COMMENT_SCENARIO_UPDATE) {
             $this->prepareAttributes();
-            $this->status = self::COMMENT_STATUS_PUBLISHED;
+
+            if ($this->onModerateStatus())
+                $this->status = self::COMMENT_STATUS_AWAITING;
+            else
+                $this->status = self::COMMENT_STATUS_PUBLISHED;
+
         }
 
         return parent::beforeValidate();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function beforeSave($insert)
+    {
+        if ($this->scenario == self::COMMENT_SCENARIO_CREATE || $this->scenario == self::COMMENT_SCENARIO_UPDATE)
+            $this->prepareAttributes();
+
+        return parent::beforeSave($insert);
     }
 
     private function prepareAttributes() {
@@ -113,7 +157,7 @@ class Comments extends \yii\db\ActiveRecord
             }
         }
 
-        if ($session = Yii::$app->getSession())
+        if ($session = Yii::$app->getSession() && !$this->scenario == self::COMMENT_SCENARIO_UPDATE)
             $this->session = $session->getId();
 
     }
@@ -127,6 +171,20 @@ class Comments extends \yii\db\ActiveRecord
             return $this->count;
 
         return null;
+    }
+
+    /**
+     * @return |null
+     */
+    public function onModerateStatus()
+    {
+        if ($this->module->newCommentsModeration) {
+            if ($this->module->approveFromRegistered && !(Yii::$app->getUser()->getIsGuest())) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

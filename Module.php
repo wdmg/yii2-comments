@@ -6,7 +6,7 @@ namespace wdmg\comments;
  * Yii2 Comments
  *
  * @category        Module
- * @version         0.0.11
+ * @version         1.0.0
  * @author          Alexsander Vyshnyvetskyy <alex.vyshnyvetskyy@gmail.com>
  * @link            https://github.com/wdmg/yii2-comments
  * @copyright       Copyright (c) 2019 - 2020 W.D.M.Group, Ukraine
@@ -42,26 +42,66 @@ class Module extends BaseModule
      */
     public $description = "Tree comments system";
 
-    public $defaultController = "comments/default";
+    /**
+     * The default frontend controller
+     *
+     * @var string
+     */
+    public $defaultController = "admin/comments/default";
 
     /**
-     * @var string or array, the default routes to rendered page (use "/" - for root)
+     * The default routes to default controller in frontend.
+     *
+     * @var string or array, use "/" - for root
      */
     public $baseRoute = "/comments";
 
+    /**
+     * Default layout for listing comments in frontend.
+     *
+     * @var string
+     */
     public $defaultListView = '@vendor/wdmg/yii2-comments/widgets/views/_list';
-    //public $defaultListView = '_list';
-    public $defaultFormView = '@vendor/wdmg/yii2-comments/widgets/views/_form';
-    //public $defaultFormView = '_form';
 
+    /**
+     * Default layout for outputting the form for adding / editing comments to the frontend.
+     *
+     * @var string
+     */
+    public $defaultFormView = '@vendor/wdmg/yii2-comments/widgets/views/_form';
+
+    /**
+     * The time during which the comment is available for editing by its author.
+     *
+     * @var int, in seconds. Use `0` for disable option.
+     */
     public $editCommentTimeout = 300; // (5 min.)
 
+    /**
+     * The time during which the comment is available for removal by the author.
+     *
+     * @var int, in seconds. Use `0` for disable option.
+     */
     public $deleteCommentTimeout = 3600; // (1 hour)
+
+    /**
+     * Moderate all new comments.
+     *
+     * @var bool, if `true` - all new comments be marked as awaiting moderation status.
+     */
+    public $newCommentsModeration = true;
+
+    /**
+     * Auto approve all new comments from registered users.
+     *
+     * @var bool, if `true` - all new comments from registered users be marked as published
+     */
+    public $approveFromRegistered = true;
 
     /**
      * @var string the module version
      */
-    private $version = "0.0.11";
+    private $version = "1.0.0";
 
     /**
      * @var integer, priority of initialization
@@ -111,73 +151,15 @@ class Module extends BaseModule
             ]
         ]);
 
+        // UrlManager rules for frontend
+        if (!$this->isBackend()) {
+            $app->getUrlManager()->addRules([
+                [
+                    'pattern' => (($this->baseRoute) ?  $this->baseRoute : '/comments') . '/<action>',
+                    'route' => (($this->defaultController) ?  $this->defaultController : 'comments/default') . '/<action>'
+                ]
+            ], true);
+        }
 
-        /*if (!$this->isBackend() && !is_null($this->defaultController)) {
-
-            // Get language scheme if available
-            $custom = false;
-            $hide = false;
-            $scheme = null;
-            if (isset(Yii::$app->translations)) {
-                $custom = true;
-                $hide = Yii::$app->translations->module->hideDefaultLang;
-                $scheme = Yii::$app->translations->module->languageScheme;
-            }
-
-            // Add routes for frontend
-            switch ($scheme) {
-                case "after":
-
-                    $app->getUrlManager()->addRules([
-                        $this->baseRoute . '/<action:[\w-]+>/<lang:\w+>' => $this->defaultController . '/<action>',
-                        $this->baseRoute . '/<lang:\w+>' => $this->defaultController . '/index',
-                    ], true);
-
-                    if ($hide) {
-                        $app->getUrlManager()->addRules([
-                            $this->baseRoute . '/<action:[\w-]+>' => $this->defaultController . '/<action>',
-                            $this->baseRoute => $this->defaultController . '/index',
-                        ], true);
-                    }
-
-                    break;
-
-                case "query":
-
-                    $app->getUrlManager()->addRules([
-                        $this->baseRoute . '/<action:[\w-]+>' => $this->defaultController . '/<action>',
-                        $this->baseRoute => $this->defaultController . '/index',
-                    ], true);
-
-                    break;
-
-                case "subdomain":
-
-                    if ($host = $app->getRequest()->getHostName()) {
-                        $app->getUrlManager()->addRules([
-                            'http(s)?://' . $host. '/' . $this->baseRoute . '/<action:[\w-]+>' => $this->defaultController . '/<action>',
-                            'http(s)?://' . $host. '/' . $this->baseRoute => $this->defaultController . '/index',
-                        ], true);
-                    }
-
-                    break;
-
-                default:
-
-                    $app->getUrlManager()->addRules([
-                        '/<lang:\w+>' . $this->baseRoute . '/<alias:[\w-]+>' => $this->defaultController . '/view',
-                        '/<lang:\w+>' . $this->baseRoute => $this->defaultController . '/index',
-                    ], true);
-
-                    if ($hide || !$custom) {
-                        $app->getUrlManager()->addRules([
-                            $this->baseRoute . '/<alias:[\w-]+>' => $this->defaultController . '/view',
-                            $this->baseRoute => $this->defaultController . '/index',
-                        ], true);
-                    }
-
-                    break;
-            }
-        }*/
     }
 }

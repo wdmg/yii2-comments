@@ -5,12 +5,13 @@
 [![GitHub license](https://img.shields.io/github/license/wdmg/yii2-comments.svg)](https://github.com/wdmg/yii2-comments/blob/master/LICENSE)
 
 # Yii2 Comments Module
-Tree comments system for Yii2
+Tree comments system for Yii2 with widgets
 
 # Requirements 
 * PHP 5.6 or higher
 * Yii2 v.2.0.35 and newest
 * [Yii2 Base](https://github.com/wdmg/yii2-base) module (required)
+* [Yii2 SelectInput](https://github.com/wdmg/yii2-selectinput) widget
 * [Yii2 Users](https://github.com/wdmg/yii2-users) module (optionaly)
 
 # Installation
@@ -38,7 +39,15 @@ To add a module to the project, add the following data in your configuration fil
         ...
         'comments' => [
             'class' => 'wdmg\comments\Module',
-            'routePrefix' => 'admin'
+            'routePrefix' => "admin",
+            'defaultController' => "admin/comments/default",
+            'baseRoute' => "/comments",
+            'defaultListView' => "@vendor/wdmg/yii2-comments/widgets/views/_list",
+            'defaultFormView' => "@vendor/wdmg/yii2-comments/widgets/views/_form",
+            'editCommentTimeout' => 300,
+            'deleteCommentTimeout' => 3600,
+            'newCommentsModeration' => true,
+            'approveFromRegistered' => true
         ],
         ...
     ],
@@ -58,6 +67,7 @@ Use the `Module::dashboardNavItems()` method of the module to generate a navigat
     ?>
 
 # Status and version [in progress development]
+* v.1.0.0 - Default controller for frontend
 * v.0.0.11 - Added pagination, up to date dependencies
 * v.0.0.10 - Fixed deprecated class declaration
 * v.0.0.9 - Added extra options to composer.json and navbar menu icon

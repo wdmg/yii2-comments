@@ -267,6 +267,6 @@ class CommentsController extends Controller
             return $model;
         }
 
-        throw new NotFoundHttpException(Yii::t('app/modules/comments', 'The requested page does not exist.'));
+        throw new NotFoundHttpException(Yii::t('app/modules/comments', 'The requested comment does not exist.'));
     }
 }

@@ -7,6 +7,8 @@ use yii\helpers\Html;
  * @var $this \yii\web\View
  * @var $id string, as `formId` property from CommentsWidget::widget()
  * @var $action string, as `formAction` property from CommentsWidget::widget()
+ * @var $context string, as `context` property from CommentsWidget::widget()
+ * @var $target string, as `target` property from CommentsWidget::widget()
  * @var $options array, as `formOptions` property from CommentsWidget::widget()
  * @var $template array, as `formTemplete` property from CommentsWidget::widget()
  * @var $model object, instance of \wdmg\comments\models\Comments
@@ -19,7 +21,6 @@ $form = ActiveForm::begin([
     'options' => (isset($options['formOptions'])) ? $options['formOptions'] : []
 ]);
 
-
 // Build form header
 $header = Html::tag(
     (isset($options['headerTag'])) ? $options['headerTag'] : 'h4',
@@ -29,18 +30,18 @@ $header = Html::tag(
 
 
 // Build name input
-$name = $form->field($model, 'name', (isset($options['nameOptions'])) ? $options['nameOptions'] : [])->textInput();
+$name = $form->field($model, 'name', (isset($options['nameOptions'])) ? $options['nameOptions'] : [])
+    ->textInput(['readonly' => (!empty($model->name))]);
 
 if (isset($options['nameLabel']))
     $name->label($options['nameLabel'], (isset($options['nameOptions']['labelOptions'])) ? $options['nameOptions']['labelOptions'] : []);
 
-
 // Build email input
-$email = $form->field($model, 'email', (isset($options['emailOptions'])) ? $options['emailOptions'] : [])->textInput();
+$email = $form->field($model, 'email', (isset($options['emailOptions'])) ? $options['emailOptions'] : [])
+    ->textInput(['readonly' => (!empty($model->email))]);
 
 if (isset($options['emailLabel']))
     $email->label($options['emailLabel'], (isset($options['emailOptions']['labelOptions'])) ? $options['emailOptions']['labelOptions'] : []);
-
 
 // Build comment textarea
 $comment = $form->field($model, 'comment', (isset($options['commentOptions'])) ? $options['commentOptions'] : [])->textarea();
@@ -52,6 +53,8 @@ if (isset($options['commentLabel']))
 // Build submit button
 $submit  = $form->field($model, 'id')->hiddenInput()->label(false);
 $submit .= $form->field($model, 'parent_id')->hiddenInput()->label(false);
+$submit .= $form->field($model, 'context')->hiddenInput(['value' => $context])->label(false);
+$submit .= $form->field($model, 'target')->hiddenInput(['value' => $target])->label(false);
 $submit .= Html::submitButton(
     (isset($options['submitLabel'])) ? $options['submitLabel'] : Yii::t('app/modules/comments','Submit'),
     (isset($options['submitOptions'])) ? $options['submitOptions'] : []

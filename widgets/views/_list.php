@@ -10,11 +10,12 @@ use yii\helpers\Url;
 
 <?php
 
-echo buildCommentsTree($comments, $id, $form_id, $actions, $options, $bundle);
+echo buildCommentsTree($comments, $id, $form_id, $context, $target, $actions, $options, $bundle);
 
-function buildCommentsTree($comments = [], $listId = null, $formId = null, $actions = null, $options = null, $bundle = null) {
+function buildCommentsTree($comments = [], $listId = null, $formId = null, $context = null, $target = null, $actions = null, $options = null, $bundle = null) {
 
     $output = '';
+    $isRootLevel = false;
     $userId = Yii::$app->getUser()->getId();
 
     if (isset($options['listRootTag']))
@@ -73,11 +74,14 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $acti
     else
         $editTimeout = false;
 
+    if (isset($options['deleteTimeout']))
+        $deleteTimeout = $options['deleteTimeout'];
+    else
+        $deleteTimeout = false;
+
     foreach($comments as $comment) {
 
         $item = '';
-        $isRootLevel = false;
-
         if (isset($comment['_level'])) {
 
             if (intval($comment['_level']) == 1)
@@ -130,7 +134,8 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $acti
         $item .= '<div class="media-content">';
 
         $item .= '<h5 class="media-heading">';
-        $item .= '#' . $comment['id'] . ' <b>' . $comment['name'] . '</b> say`s:';
+
+        $item .= Html::a('#' . $comment['id'], Url::to('#comment-' . $comment['id'])) . ' <b>' . $comment['name'] . '</b> say`s:';
 
         $item .= Html::tag('small', Html::tag('i', '&nbsp;', [
                 'class' => "fa fa-clock fa-fw"
@@ -140,32 +145,42 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $acti
 
         $item .= '</h5>'; // .media-heading
 
-        $item .= Html::tag('div', $comment['comment'], [
-            'class' => "comment-text"
-        ]);
+        if (intval($comment['status']) !== -1) {
+            $item .= Html::tag('div', $comment['comment'], [
+                'class' => "comment-text"
+            ]);
+        } else {
+            $item .= Html::tag('em', Yii::t('app/modules/comments','Comment has been deleted.'), [
+                'class' => "comment-text text-muted"
+            ]);
+        }
+
 
         $item .= '</div>'; // .media-content
 
         $item .= '<div class="media-footer">';
-        if ($editTimeout && !is_null($userId)) {
+        if (!is_null($userId) && intval($comment['status']) !== -1) {
             if (
                 (
                     ((intval($comment['user_id']) == $userId) && !is_null($userId)) ||
                     ($comment['user_id'] == \Yii::$app->session->getId())
                 ) && isset($actions['delete'])
             ) {
-                $item .= Html::a(Yii::t('app/modules/comments','Delete'), [
-                    $actions['delete'],
-                    'id' => $comment['id']
-                ], [
-                    'class' => 'btn btn-sm btn-link pull-right',
-                    'data' => [
-                        'toggle' => 'comments-delete',
-                        'key' => $comment['id']
-                    ]
-                ]);
 
-                if (intval($editTimeout) >= (time() - strtotime($comment['updated_at'])) && isset($actions['edit'])) {
+                if (!$deleteTimeout || (intval($deleteTimeout) >= (time() - strtotime($comment['updated_at'])) && isset($actions['delete']))) {
+                    $item .= Html::a(Yii::t('app/modules/comments', 'Delete'), [
+                        $actions['delete'],
+                        'id' => $comment['id']
+                    ], [
+                        'class' => 'btn btn-sm btn-link pull-right',
+                        'data' => [
+                            'toggle' => 'comments-delete',
+                            'key' => $comment['id']
+                        ]
+                    ]);
+                }
+
+                if (!$editTimeout || (intval($editTimeout) >= (time() - strtotime($comment['updated_at'])) && isset($actions['edit']))) {
                     $item .= Html::a(Yii::t('app/modules/comments','Edit'), [
                         $actions['edit'],
                         'id' => $comment['id']
@@ -179,7 +194,7 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $acti
                 }
             }
         }
-        if (intval($comment['user_id']) !== $userId && isset($actions['abuse'])) {
+        if (intval($comment['user_id']) !== $userId && isset($actions['abuse']) && intval($comment['status']) !== -1) {
             $item .= Html::a(Yii::t('app/modules/comments','Abuse'), [
                 $actions['abuse'],
                 'id' => $comment['id']
@@ -212,7 +227,7 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $acti
 
         if (isset($comment['items'])) {
             if (is_array($comment['items'])) {
-                $item .= buildCommentsTree($comment['items'], $listId, $formId, $actions, $options, $bundle);
+                $item .= buildCommentsTree($comment['items'], $listId, $formId, $context, $target, $actions, $options, $bundle);
             }
         }
 
@@ -224,12 +239,18 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $acti
 
         if ($isRootLevel) {
             $output .= Html::tag($itemRootTag, $item, ArrayHelper::merge($itemRootOptions, [
+                'id' => '#comment-' . $comment['id'],
+                'class' => ((isset($itemRootOptions['class'])) ? $itemRootOptions['class'] : '') .
+                    ((intval($comment['status']) == -1) ? ' item-deleted' : ''),
                 'data' => [
                     'comment-id' => $comment['id']
                 ],
             ]));
         } else {
             $output .= Html::tag($itemReplyTag, $item, ArrayHelper::merge($itemReplyOptions, [
+                'id' => 'comment-' . $comment['id'],
+                'class' => ((isset($itemRootOptions['class'])) ? $itemRootOptions['class'] : '') .
+                    ((intval($comment['status']) == -1) ? ' item-deleted' : ''),
                 'data' => [
                     'comment-id' => $comment['id']
                 ],
@@ -241,7 +262,9 @@ function buildCommentsTree($comments = [], $listId = null, $formId = null, $acti
         return Html::tag($listRootTag, $output, ArrayHelper::merge($listRootOptions, [
             'id' => $listId,
             'data' => [
-                'target' => '#' . $formId
+                'form' => '#' . $formId,
+                'context' => $context,
+                'target' => $target
             ]
         ]));
     else

@@ -63,7 +63,8 @@ class CommentsWidget  extends Widget
         'itemReplyOptions' => [
             'class' => 'media comment-reply'
         ],
-        'editTimeout' => 3600, // time in seconds
+        'editTimeout' => null,
+        'deleteTimeout' => null,
         'userPhotoSize' => 64, // 64/96/128px
         'useGravatar' => false,
         'userPhotoAlign' => 'left', // left/right
@@ -93,13 +94,13 @@ class CommentsWidget  extends Widget
             $this->listView = $module->defaultListView;
 
         if (!isset($this->listActions['edit']))
-            $this->listActions['edit'] = Url::to([$module->defaultController . '/edit']);
+            $this->listActions['edit'] = Url::to([$module->baseRoute . '/edit']);
 
         if (!isset($this->listActions['delete']))
-            $this->listActions['delete'] = Url::to([$module->defaultController . '/delete']);
+            $this->listActions['delete'] = Url::to([$module->baseRoute . '/delete']);
 
         if (!isset($this->listActions['abuse']))
-            $this->listActions['abuse'] = Url::to([$module->defaultController . '/abuse']);
+            $this->listActions['abuse'] = Url::to([$module->baseRoute . '/abuse']);
 
         if (!isset($this->listActions['reply']))
             $this->listActions['reply'] = '#reply';
@@ -108,24 +109,33 @@ class CommentsWidget  extends Widget
             $this->formView = $module->defaultFormView;
 
         if (!isset($this->formAction))
-            $this->formAction = Url::to([$module->defaultController . '/create']);
+            $this->formAction = Url::to([$module->baseRoute . '/create']);
 
         if ($comments = Yii::$app->comments->get($this->context, $this->target))
             $this->_comments = $comments;
 
-        $this->_model = Yii::$app->comments->getModel($this->context, $this->target, true);
+        if (!isset($listOptions['editTimeout']) && isset($module->editCommentTimeout))
+            $listOptions['editTimeout'] = $module->editCommentTimeout;
 
+        if (!isset($listOptions['deleteTimeout']) && isset($module->deleteCommentTimeout))
+            $listOptions['deleteTimeout'] = $module->deleteCommentTimeout;
+
+        $this->_model = Yii::$app->comments->getModel($this->context, $this->target, true);
         parent::init();
     }
 
     public function run()
     {
         $output = '';
+        $returnUrl = Yii::$app->getRequest()->absoluteUrl;
+        Yii::$app->getUser()->setReturnUrl($returnUrl);
 
         if (!is_null($this->_comments) && $this->listView !== false) {
             $output .= $this->render($this->listView, [
                 'id' => $this->listId,
                 'form_id' => $this->formId,
+                'context' => $this->context,
+                'target' => $this->target,
                 'count' => $this->_comments['count'],
                 'actions' => $this->listActions,
                 'comments' => $this->_comments['items'],
@@ -138,6 +148,8 @@ class CommentsWidget  extends Widget
             $output .= $this->render($this->formView, [
                 'id' => $this->formId,
                 'action' => $this->formAction,
+                'context' => $this->context,
+                'target' => $this->target,
                 'options' => (is_array($this->formOptions)) ? $this->formOptions : null,
                 'template' => (!is_null($this->formTemplate)) ? $this->formTemplate : null,
                 'model' => $this->_model,

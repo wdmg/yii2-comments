@@ -7,7 +7,7 @@ namespace wdmg\comments\components;
  * Yii2 Comments
  *
  * @category        Component
- * @version         0.0.11
+ * @version         1.0.0
  * @author          Alexsander Vyshnyvetskyy <alex.vyshnyvetskyy@gmail.com>
  * @link            https://github.com/wdmg/yii2-comments
  * @copyright       Copyright (c) 2019 - 2020 W.D.M.Group, Ukraine
@@ -58,15 +58,16 @@ class Comments extends Component
         if (is_null($target))
             return null;
 
+        $this->model->setScenario($this->model::COMMENT_SCENARIO_LISTING);
         $query = $this->model::find()->where([
             'context' => $context,
             'target' => $target,
         ]);
 
         $query->andWhere([
-            'status' => $this->model::COMMENT_STATUS_PUBLISHED
-        ])->orWhere([
-            'status' => $this->model::COMMENT_STATUS_DELETED
+            'or',
+            ['status' => $this->model::COMMENT_STATUS_PUBLISHED],
+            ['status' => $this->model::COMMENT_STATUS_DELETED]
         ]);
 
         if ($query->exists()) {
@@ -77,6 +78,7 @@ class Comments extends Component
                 ];
             }
         }
+
         return null;
     }
 
@@ -96,14 +98,17 @@ class Comments extends Component
         if (is_null($target))
             return null;
 
-        if ($newInstance)
+        if ($newInstance) {
             $model = new \wdmg\comments\models\Comments;
-        else
+            $model->setScenario($model::COMMENT_SCENARIO_CREATE);
+        } else {
             $model = $this->model;
+            $model->setScenario($model::COMMENT_SCENARIO_UPDATE);
+        }
 
         $model->context = $context;
         $model->target = $target;
-
+        $model->setScenario($model::COMMENT_SCENARIO_CREATE);
         return $model;
     }
 
