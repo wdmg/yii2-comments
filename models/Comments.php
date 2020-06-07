@@ -108,7 +108,7 @@ class Comments extends \yii\db\ActiveRecord
         if (!($this->module = Yii::$app->getModule('admin/comments')))
             $this->module = Yii::$app->getModule('comments');
 
-        if (!$this->module->isBackend())
+        if (!$this->module->isBackend() && !$this->module->isRestAPI())
             $this->setScenario(self::COMMENT_SCENARIO_LISTING);
 
         if (in_array($this->scenario, [self::COMMENT_SCENARIO_CREATE, self::COMMENT_SCENARIO_UPDATE, self::COMMENT_SCENARIO_LISTING]))
@@ -153,6 +153,8 @@ class Comments extends \yii\db\ActiveRecord
                 $this->email = $identity->email;
                 $this->user_id = $identity->getId();
             } else {
+                $this->name = null;
+                $this->email = null;
                 $this->user_id = null;
             }
         }
