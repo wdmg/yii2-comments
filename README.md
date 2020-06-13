@@ -1,11 +1,13 @@
 [![Yii2](https://img.shields.io/badge/required-Yii2_v2.0.35-blue.svg)](https://packagist.org/packages/yiisoft/yii2)
 [![Downloads](https://img.shields.io/packagist/dt/wdmg/yii2-comments.svg)](https://packagist.org/packages/wdmg/yii2-comments)
 [![Packagist Version](https://img.shields.io/packagist/v/wdmg/yii2-comments.svg)](https://packagist.org/packages/wdmg/yii2-comments)
-![Progress](https://img.shields.io/badge/progress-in_development-red.svg)
+![Progress](https://img.shields.io/badge/progress-ready_to_use-green.svg)
 [![GitHub license](https://img.shields.io/github/license/wdmg/yii2-comments.svg)](https://github.com/wdmg/yii2-comments/blob/master/LICENSE)
 
 # Yii2 Comments Module
-Tree comments system for Yii2 with widgets
+Tree comments system for Yii2 with widgets. The functionality of the module allows you to manage user comments with pre-moderation or automatic approval for registered users.
+This module is an integral part of the [Butterfly.SMS](https://butterflycms.com/) content management system, but can also be used as an standalone extension.
+Copyrights (c) 2019-2020 [W.D.M.Group, Ukraine](https://wdmg.com.ua/)
 
 # Requirements 
 * PHP 5.6 or higher
@@ -66,7 +68,8 @@ Use the `Module::dashboardNavItems()` method of the module to generate a navigat
         ]);
     ?>
 
-# Status and version [in progress development]
+# Status and version [ready to use]
+* v.1.0.1 - Update README.md
 * v.1.0.0 - Default controller for frontend
 * v.0.0.11 - Added pagination, up to date dependencies
 * v.0.0.10 - Fixed deprecated class declaration

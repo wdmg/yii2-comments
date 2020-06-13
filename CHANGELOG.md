@@ -1,6 +1,9 @@
 Changelog
 =========
 
+## 1.0.1 (2020-06-14)
+ * Update README.md
+
 ## 1.0.0 (2020-06-07)
  * Default controller for frontend
  * View comment, edit comment form
