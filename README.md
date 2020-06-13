@@ -4,9 +4,13 @@
 ![Progress](https://img.shields.io/badge/progress-ready_to_use-green.svg)
 [![GitHub license](https://img.shields.io/github/license/wdmg/yii2-comments.svg)](https://github.com/wdmg/yii2-comments/blob/master/LICENSE)
 
+<img src="./docs/images/yii2-comments.png" width="100%" alt="Yii2 Comments Module" />
+
 # Yii2 Comments Module
-Tree comments system for Yii2 with widgets. The functionality of the module allows you to manage user comments with pre-moderation or automatic approval for registered users.
+Tree comments system for Yii2 with widget. The functionality of the module allows you to manage user comments with pre-moderation or automatic approval for registered users.
+
 This module is an integral part of the [Butterfly.SMS](https://butterflycms.com/) content management system, but can also be used as an standalone extension.
+
 Copyrights (c) 2019-2020 [W.D.M.Group, Ukraine](https://wdmg.com.ua/)
 
 # Requirements 
@@ -53,6 +57,16 @@ To add a module to the project, add the following data in your configuration fil
         ],
         ...
     ],
+
+# Usecase
+Use the CommentsWidget::widget() to render comment`s list by context and target.
+
+    <?php
+        echo \wdmg\comments\widgets\CommentsWidget::widget([
+            'context' => 'page-comments',
+            'target' => 'site/index'
+        ]);
+    ?>
 
 # Routing
 Use the `Module::dashboardNavItems()` method of the module to generate a navigation items list for NavBar, like this:
