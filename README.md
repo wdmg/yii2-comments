@@ -9,7 +9,7 @@
 # Yii2 Comments Module
 Tree comments system for Yii2 with widget. The functionality of the module allows you to manage user comments with pre-moderation or automatic approval for registered users.
 
-This module is an integral part of the [Butterfly.SMS](https://butterflycms.com/) content management system, but can also be used as an standalone extension.
+This module is an integral part of the [Butterfly.СMS](https://butterflycms.com/) content management system, but can also be used as an standalone extension.
 
 Copyrights (c) 2019-2020 [W.D.M.Group, Ukraine](https://wdmg.com.ua/)
 
