@@ -1,6 +1,9 @@
 Changelog
 =========
 
+## 1.0.2 (2021-01-17)
+ * Fixed mysql syntax error: 1055 for >= MySQL 5.7
+ 
 ## 1.0.1 (2020-06-14)
  * Added assets (gitignore fix)
  * Update README.md

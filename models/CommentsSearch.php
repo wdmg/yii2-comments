@@ -2,6 +2,7 @@
 
 namespace wdmg\comments\models;
 
+use Yii;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use wdmg\comments\models\Comments;
@@ -65,15 +66,19 @@ class CommentsSearch extends Comments
             // uncomment the following line if you do not want to return any records when validation fails
             // $query->where('0=1');
             return $dataProvider;
-        }/* else {
-            // query all without languages version
-            $query->where([
-                'parent_id' => null,
-            ]);
-        }*/
+        }
 
-        if ($this->scenario == 'grouped')
-            $query->select("*, COUNT(*) as count");
+        if ($this->scenario == 'grouped') {
+            if (
+                in_array(Yii::$app->db->getDriverName(), ['mysql', 'mysqli'], true) &&
+                version_compare(\Yii::$app->db->getServerVersion(), '5.7', '>=')
+            ) {
+                $query->select("context, target, ANY_VALUE(comment) as comment, ANY_VALUE(updated_at) as updated_at, COUNT(*) as count");
+            } else {
+                $query->select("*, COUNT(*) as count");
+            }
+
+        }
 
         // grid filtering conditions
         $query->andFilterWhere([
