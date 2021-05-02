@@ -74,6 +74,8 @@ return [
     'Close' => "Закрыть",
     'Save' => "Сохранить",
 
+    'New comments for the last 24 hours' => "Новых комментариев за последние сутки",
+    'New comments and reviews for the last 24 hours' => "Новых комментариев и отзывов за последние сутки",
     'Comment has been deleted.' => "Комментарий был удален.",
 
     'All contexts' => "Все контексты",
