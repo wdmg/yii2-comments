@@ -83,6 +83,7 @@ Use the `Module::dashboardNavItems()` method of the module to generate a navigat
     ?>
 
 # Status and version [ready to use]
+* v.1.0.3 - Added counter stats method
 * v.1.0.2 - Fixed mysql syntax error: 1055 for >= MySQL 5.7
 * v.1.0.1 - Update README.md
 * v.1.0.0 - Default controller for frontend
