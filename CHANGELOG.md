@@ -1,6 +1,9 @@
 Changelog
 =========
 
+## 2.0.0 (2023-06-25)
+ * Update copyrights, fix nav menu
+
 ## 1.0.3 (2021-05-10)
  * Added counter stats method
  
